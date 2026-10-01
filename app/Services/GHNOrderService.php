@@ -47,10 +47,33 @@ class GHNOrderService
             $normalizedPhone = $rawPhone;
         }
 
-        // 1: Người gửi / Shop trả cước cho GHN (Vì phí ship đã được tính vào tổng tiền đơn hàng & COD)
-        // Nhờ vậy khi shipper giao hàng chỉ thu đúng tiền COD, khách không bao giờ bị thu cước lần 2.
+        // 1. Tính toán trước cước phí thực tế của tuyến đường để COD và Tổng đơn hàng khớp nhau 100%
+        $calcRes = $this->ghn->calculateFee([
+            'from_district_id' => 1442,
+            'from_ward_code' => '20508',
+            'to_district_id' => $toDistrictId,
+            'to_ward_code' => $toWardCode,
+            'service_type_id' => 2,
+            'weight' => $weight > 0 ? $weight : 300,
+            'length' => 15,
+            'width' => 15,
+            'height' => 10,
+            'insurance_value' => 0,
+        ]);
+
+        $finalShippingFee = ($calcRes['code'] == 200 && isset($calcRes['data']['total']))
+            ? (int) $calcRes['data']['total']
+            : (int) ($order->shipping_fee ?: 20900);
+
+        $finalTotalAmount = max(0, (int) $order->subtotal - (int) $order->discount_amount + $finalShippingFee);
+
+        // 2. Cấu hình đơn hàng gửi sang GHN:
+        // payment_type_id = 1: Bên gửi trả phí (Shop thanh toán cước GHN từ tiền đã thu của khách)
+        // cod_amount = đúng bằng Tổng thanh toán đơn hàng trên website
         $payload = [
             'payment_type_id' => 1,
+            'from_district_id' => 1442,
+            'from_ward_code' => '20508',
             'note' => 'Đơn hàng #' . $order->order_code . ($order->note ? ' - ' . $order->note : '') . ' (SĐT gốc: ' . $order->customer_phone . ')',
             'required_note' => 'KHONGCHOXEMHANG',
             'return_phone' => config('services.ghn.client_phone', '0854571834'),
@@ -60,7 +83,7 @@ class GHNOrderService
             'to_address' => $order->shipping_address,
             'to_ward_code' => $toWardCode,
             'to_district_id' => $toDistrictId,
-            'cod_amount' => $isOrderPaid ? 0 : (int) $order->total_amount,
+            'cod_amount' => $isOrderPaid ? 0 : $finalTotalAmount,
             'weight' => $weight > 0 ? $weight : 300,
             'length' => 15,
             'width' => 15,
@@ -76,6 +99,9 @@ class GHNOrderService
             $payload['to_district_id'] = 1442; // Q. Cầu Giấy (luôn active trên GHN Sandbox)
             $payload['to_ward_code'] = '20508'; // P. Dịch Vọng
             $payload['note'] .= ' - Địa chỉ thật: ' . $order->shipping_address;
+            $finalShippingFee = 20900;
+            $finalTotalAmount = max(0, (int) $order->subtotal - (int) $order->discount_amount + $finalShippingFee);
+            $payload['cod_amount'] = $isOrderPaid ? 0 : $finalTotalAmount;
             $res = $this->ghn->createOrder($payload);
             $toDistrictId = 1442;
             $toWardCode = '20508';
@@ -84,21 +110,18 @@ class GHNOrderService
         // Khi GHN phản hồi thành công
         if (isset($res['code']) && $res['code'] == 200 && isset($res['data']['order_code'])) {
             $ghnCode = $res['data']['order_code'];
-            $totalFee = (int) ($res['data']['total_fee'] ?? 0);
+            $totalFee = (int) ($res['data']['total_fee'] ?? $finalShippingFee);
             $expectedTime = isset($res['data']['expected_delivery_time'])
                 ? Carbon::parse($res['data']['expected_delivery_time'])
                 : Carbon::now()->addDays(3);
-
-            $syncedShippingFee = $totalFee > 0 ? $totalFee : (int)$order->shipping_fee;
-            $syncedTotalAmount = max(0, $order->subtotal - $order->discount_amount + $syncedShippingFee);
 
             $order->update([
                 'ghn_order_code' => $ghnCode,
                 'ghn_status' => 'ready_to_pick',
                 'ghn_fee' => $totalFee,
                 'ghn_total_fee' => $totalFee,
-                'shipping_fee' => $syncedShippingFee,
-                'total_amount' => $syncedTotalAmount,
+                'shipping_fee' => $totalFee,
+                'total_amount' => $finalTotalAmount,
                 'ghn_expected_delivery' => $expectedTime,
                 'to_district_id' => $toDistrictId,
                 'to_ward_code' => $toWardCode,

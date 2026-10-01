@@ -134,6 +134,48 @@
                     @endif
                 </div>
 
+                <!-- Shipping Estimator (GHN) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0">
+                            <i class="fa-solid fa-truck-fast me-2 text-primary"></i> Ước Tính Cước Vận Chuyển GHN
+                        </h6>
+                        <a href="{{ route('shipping.calculator') }}" class="small text-decoration-none text-primary" title="Mở bảng tra chi tiết">
+                            Tra chi tiết <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 0.75rem;"></i>
+                        </a>
+                    </div>
+                    <p class="text-muted small mb-3">Chọn địa chỉ nhận hàng để xem trước cước phí Giao Hàng Nhanh:</p>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12">
+                            <select id="cart_province" class="form-select form-select-sm rounded-3">
+                                <option value="">-- Đang tải Tỉnh / Thành... --</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select id="cart_district" class="form-select form-select-sm rounded-3" disabled>
+                                <option value="">-- Quận / Huyện --</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select id="cart_ward" class="form-select form-select-sm rounded-3" disabled>
+                                <option value="">-- Phường / Xã --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Estimate Result Alert -->
+                    <div id="cart_estimate_result" class="d-none mt-3 p-3 rounded-3 bg-light border border-primary-subtle">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted"><i class="fa-solid fa-box me-1 text-primary"></i> Cước GHN dự kiến:</span>
+                            <span class="fw-extrabold text-primary fs-5" id="cart_estimated_fee">0 ₫</span>
+                        </div>
+                        <div class="small text-secondary d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-clock-rotate-left text-success"></i> Thời gian giao dự kiến: <strong>1 - 3 ngày</strong>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Cost Summary -->
                 <div class="card border-0 shadow-sm rounded-4 p-4">
                     <h5 class="fw-bold mb-4">Tóm Tắt Đơn Hàng</h5>
@@ -152,7 +194,7 @@
 
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Phí vận chuyển:</span>
-                        <span class="fw-bold">
+                        <span class="fw-bold" id="cart_summary_shipping">
                             @if($shippingFee == 0)
                                 <span class="text-success">Miễn phí</span>
                             @else
@@ -165,7 +207,7 @@
 
                     <div class="d-flex justify-content-between mb-4 align-items-baseline">
                         <span class="fw-bold fs-5">Tổng tiền:</span>
-                        <span class="fw-extrabold fs-3 text-primary">{{ number_format($total, 0, ',', '.') }} ₫</span>
+                        <span class="fw-extrabold fs-3 text-primary" id="cart_summary_total">{{ number_format($total, 0, ',', '.') }} ₫</span>
                     </div>
 
                     @auth
@@ -195,3 +237,129 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const provinceSelect = document.getElementById('cart_province');
+    const districtSelect = document.getElementById('cart_district');
+    const wardSelect = document.getElementById('cart_ward');
+    const estimateResult = document.getElementById('cart_estimate_result');
+    const estimatedFeeText = document.getElementById('cart_estimated_fee');
+    const summaryShipping = document.getElementById('cart_summary_shipping');
+    const summaryTotal = document.getElementById('cart_summary_total');
+    
+    const subtotalAfterDiscount = {{ max(0, $subtotal - ($discount ?? 0)) }};
+
+    if (!provinceSelect) return;
+
+    // 1. Tải Tỉnh/Thành
+    fetch("{{ route('locations.provinces') }}")
+        .then(res => res.json())
+        .then(res => {
+            if (res.data) {
+                let options = '<option value="">-- Chọn Tỉnh / Thành phố --</option>';
+                res.data.forEach(p => {
+                    options += `<option value="${p.ProvinceID}">${p.ProvinceName}</option>`;
+                });
+                provinceSelect.innerHTML = options;
+            }
+        })
+        .catch(err => {
+            console.error("Lỗi load tỉnh/thành:", err);
+            provinceSelect.innerHTML = '<option value="">-- Không tải được dữ liệu --</option>';
+        });
+
+    // 2. Chọn Tỉnh -> Tải Quận/Huyện
+    provinceSelect.addEventListener('change', function () {
+        districtSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+        districtSelect.disabled = true;
+        wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+        wardSelect.disabled = true;
+        estimateResult.classList.add('d-none');
+
+        if (!this.value) return;
+
+        fetch(`/locations/districts/${this.value}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.data) {
+                    let options = '<option value="">-- Chọn Quận / Huyện --</option>';
+                    res.data.forEach(d => {
+                        options += `<option value="${d.DistrictID}">${d.DistrictName}</option>`;
+                    });
+                    districtSelect.innerHTML = options;
+                    districtSelect.disabled = false;
+                }
+            })
+            .catch(err => console.error("Lỗi load quận/huyện:", err));
+    });
+
+    // 3. Chọn Huyện -> Tải Phường/Xã
+    districtSelect.addEventListener('change', function () {
+        wardSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+        wardSelect.disabled = true;
+        estimateResult.classList.add('d-none');
+
+        if (!this.value) return;
+
+        fetch(`/locations/wards/${this.value}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.data) {
+                    let options = '<option value="">-- Chọn Phường / Xã --</option>';
+                    res.data.forEach(w => {
+                        options += `<option value="${w.WardCode}">${w.WardName}</option>`;
+                    });
+                    wardSelect.innerHTML = options;
+                    wardSelect.disabled = false;
+                }
+            })
+            .catch(err => console.error("Lỗi load phường/xã:", err));
+    });
+
+    // 4. Chọn Phường/Xã -> Tính cước
+    wardSelect.addEventListener('change', function () {
+        if (!this.value || !districtSelect.value) return;
+
+        estimatedFeeText.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        estimateResult.classList.remove('d-none');
+
+        fetch("{{ route('locations.fee') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                to_district_id: districtSelect.value,
+                to_ward_code: this.value
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            let fee = 30000;
+            if (res.code === 200 && res.data) {
+                fee = parseInt(res.data.total) || 0;
+            }
+            const feeFormatted = new Intl.NumberFormat('vi-VN').format(fee) + ' ₫';
+            estimatedFeeText.innerText = feeFormatted;
+            
+            // Cập nhật lên tóm tắt đơn hàng
+            if (summaryShipping) {
+                summaryShipping.innerText = feeFormatted;
+            }
+            if (summaryTotal) {
+                const newTotal = subtotalAfterDiscount + fee;
+                summaryTotal.innerText = new Intl.NumberFormat('vi-VN').format(newTotal) + ' ₫';
+            }
+        })
+        .catch(err => {
+            console.error("Lỗi tính cước GHN:", err);
+            estimatedFeeText.innerText = '30.000 ₫ (ước tính)';
+        });
+    });
+});
+</script>
+@endpush

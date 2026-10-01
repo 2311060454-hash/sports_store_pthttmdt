@@ -134,6 +134,38 @@ class NewFeaturesTest extends TestCase
 
         $res = $this->get('/admin/ghn');
         $res->assertStatus(200)
-            ->assertSee('Đồng Bộ Giao Hàng Nhanh');
+            ->assertSee('Đồng Bộ Giao Hàng Nhanh')
+            ->assertSee('Công Cụ Tính Cước Phí Nhanh');
+    }
+
+    public function test_shipping_calculator_page_and_custom_fee(): void
+    {
+        $pageResponse = $this->get('/shipping-calculator');
+        $pageResponse->assertStatus(200)
+            ->assertSee('Tra Cứu & Tính Cước Phí Vận Chuyển')
+            ->assertSee('Sport Store');
+
+        $feeResponse = $this->postJson('/locations/calculate-custom-fee', [
+            'to_district_id' => 1442,
+            'to_ward_code' => '20508',
+            'weight' => 500,
+            'length' => 20,
+            'width' => 15,
+            'height' => 10,
+            'insurance_value' => 300000,
+        ]);
+
+        $feeResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonStructure([
+                'success',
+                'ghn_response',
+                'expected_time',
+                'expected_date',
+                'weight',
+                'dimensions',
+            ]);
     }
 }

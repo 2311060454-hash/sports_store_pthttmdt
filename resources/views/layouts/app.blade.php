@@ -277,6 +277,9 @@
                 <span><i class="fa-solid fa-envelope me-1 text-warning"></i> support@sportstore.com</span>
             </div>
             <div>
+                <a href="{{ route('shipping.calculator') }}" class="text-decoration-none text-light me-3">
+                    <i class="fa-solid fa-calculator me-1 text-warning"></i> Tra cước GHN
+                </a>
                 <span class="me-3"><i class="fa-solid fa-truck-fast me-1 text-success"></i> Miễn phí vận chuyển từ 500.000đ</span>
                 @if(auth()->check() && auth()->user()->isAdmin())
                     <a href="{{ route('admin.dashboard') }}" class="badge bg-danger text-white text-decoration-none px-2 py-1">
@@ -322,6 +325,11 @@
                         <li class="nav-link-item">
                             <a class="nav-link text-danger {{ request()->routeIs('promotions') ? 'active fw-bold' : '' }}" href="{{ route('promotions') }}">
                                 <i class="fa-solid fa-fire me-1"></i> Khuyến mãi
+                            </a>
+                        </li>
+                        <li class="nav-link-item">
+                            <a class="nav-link {{ request()->routeIs('shipping.calculator') ? 'active text-primary fw-bold' : '' }}" href="{{ route('shipping.calculator') }}">
+                                <i class="fa-solid fa-truck-fast me-1 text-primary"></i> Tra cước GHN
                             </a>
                         </li>
                         <li class="nav-link-item">
@@ -439,6 +447,7 @@
                 <div class="col-lg-3 col-md-6">
                     <h6>Chính Sách & Hỗ Trợ</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="{{ route('shipping.calculator') }}" class="text-primary fw-semibold"><i class="fa-solid fa-calculator me-1"></i> Tra cứu cước phí GHN</a></li>
                         <li><a href="{{ route('about') }}">Chính sách giao hàng toàn quốc</a></li>
                         <li><a href="{{ route('about') }}">Chính sách đổi trả trong 30 ngày</a></li>
                         <li><a href="{{ route('about') }}">Bảo hành chính hãng 12 tháng</a></li>

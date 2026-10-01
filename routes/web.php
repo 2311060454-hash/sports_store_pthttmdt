@@ -60,11 +60,13 @@ Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.a
 Route::post('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');
 
 // GHN Shipping Locations & Fee Calculation (Lab 05)
+Route::get('/shipping-calculator', [GHNController::class, 'calculatorPage'])->name('shipping.calculator');
 Route::prefix('locations')->name('locations.')->group(function () {
     Route::get('/provinces', [GHNController::class, 'getProvinces'])->name('provinces');
     Route::get('/districts/{provinceId}', [GHNController::class, 'getDistricts'])->name('districts');
     Route::get('/wards/{districtId}', [GHNController::class, 'getWards'])->name('wards');
     Route::post('/calculate-fee', [GHNController::class, 'getShippingFee'])->name('fee');
+    Route::post('/calculate-custom-fee', [GHNController::class, 'calculateCustomFee'])->name('custom-fee');
 });
 
 // Live Chat (Customer)

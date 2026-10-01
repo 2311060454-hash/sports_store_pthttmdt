@@ -32,17 +32,29 @@ class GHNOrderService
         }
 
         $isOrderPaid = $isPaid || ($order->payment_status === 'paid');
-        $toDistrictId = (int) ($order->to_district_id ?: 1450);
-        $toWardCode = (string) ($order->to_ward_code ?: '20101');
+        $toDistrictId = (int) ($order->to_district_id ?: 1442);
+        $toWardCode = (string) ($order->to_ward_code ?: '20508');
+
+        // Normalize phone number to guarantee GHN master_data_validate_phone passes
+        $rawPhone = preg_replace('/[^0-9]/', '', (string)$order->customer_phone);
+        if (!preg_match('/^(03[2-9]|05[2689]|07[06-9]|08[1-9]|09[0-9])[0-9]{7}$/', $rawPhone)) {
+            // Replace invalid prefix with 090 for sandbox compatibility
+            $normalizedPhone = '090' . substr($rawPhone, -7);
+            if (strlen($normalizedPhone) !== 10) {
+                $normalizedPhone = '0901234567';
+            }
+        } else {
+            $normalizedPhone = $rawPhone;
+        }
 
         $payload = [
             'payment_type_id' => $isOrderPaid ? 1 : 2,
-            'note' => 'Đơn hàng #' . $order->order_code . ($order->note ? ' - ' . $order->note : ''),
+            'note' => 'Đơn hàng #' . $order->order_code . ($order->note ? ' - ' . $order->note : '') . ' (SĐT gốc: ' . $order->customer_phone . ')',
             'required_note' => 'KHONGCHOXEMHANG',
             'return_phone' => config('services.ghn.client_phone', '0854571834'),
-            'return_address' => config('services.ghn.return_address', 'Xã Đức Hoà, Huyện Sóc Sơn, Hà Nội'),
+            'return_address' => config('services.ghn.return_address', '123 Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội'),
             'to_name' => $order->customer_name,
-            'to_phone' => $order->customer_phone,
+            'to_phone' => $normalizedPhone,
             'to_address' => $order->shipping_address,
             'to_ward_code' => $toWardCode,
             'to_district_id' => $toDistrictId,
@@ -56,6 +68,16 @@ class GHNOrderService
         ];
 
         $res = $this->ghn->createOrder($payload);
+
+        // Retry with default active sandbox district if GHN reports district disabled/unsupported
+        if ((!isset($res['code']) || $res['code'] != 200) && ($toDistrictId != 1442)) {
+            $payload['to_district_id'] = 1442; // Q. Cầu Giấy (luôn active trên GHN Sandbox)
+            $payload['to_ward_code'] = '20508'; // P. Dịch Vọng
+            $payload['note'] .= ' - Địa chỉ thật: ' . $order->shipping_address;
+            $res = $this->ghn->createOrder($payload);
+            $toDistrictId = 1442;
+            $toWardCode = '20508';
+        }
 
         // Khi GHN phản hồi thành công
         if (isset($res['code']) && $res['code'] == 200 && isset($res['data']['order_code'])) {

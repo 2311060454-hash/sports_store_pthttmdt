@@ -47,8 +47,10 @@ class GHNOrderService
             $normalizedPhone = $rawPhone;
         }
 
+        // 1: Người gửi / Shop trả cước cho GHN (Vì phí ship đã được tính vào tổng tiền đơn hàng & COD)
+        // Nhờ vậy khi shipper giao hàng chỉ thu đúng tiền COD, khách không bao giờ bị thu cước lần 2.
         $payload = [
-            'payment_type_id' => $isOrderPaid ? 1 : 2,
+            'payment_type_id' => 1,
             'note' => 'Đơn hàng #' . $order->order_code . ($order->note ? ' - ' . $order->note : '') . ' (SĐT gốc: ' . $order->customer_phone . ')',
             'required_note' => 'KHONGCHOXEMHANG',
             'return_phone' => config('services.ghn.client_phone', '0854571834'),

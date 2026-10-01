@@ -48,7 +48,7 @@ class GHNController extends Controller
             'to_ward_code' => 'required|string',
         ]);
 
-        $cart = session('cart', []);
+        $cart = session('shopping_cart', session('cart', []));
         $weight = 0;
         $insuranceValue = 0;
 

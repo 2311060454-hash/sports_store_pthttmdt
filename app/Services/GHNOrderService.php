@@ -89,11 +89,16 @@ class GHNOrderService
                 ? Carbon::parse($res['data']['expected_delivery_time'])
                 : Carbon::now()->addDays(3);
 
+            $syncedShippingFee = $totalFee > 0 ? $totalFee : (int)$order->shipping_fee;
+            $syncedTotalAmount = max(0, $order->subtotal - $order->discount_amount + $syncedShippingFee);
+
             $order->update([
                 'ghn_order_code' => $ghnCode,
                 'ghn_status' => 'ready_to_pick',
                 'ghn_fee' => $totalFee,
                 'ghn_total_fee' => $totalFee,
+                'shipping_fee' => $syncedShippingFee,
+                'total_amount' => $syncedTotalAmount,
                 'ghn_expected_delivery' => $expectedTime,
                 'to_district_id' => $toDistrictId,
                 'to_ward_code' => $toWardCode,

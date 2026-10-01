@@ -30,7 +30,7 @@ class OrderService
             throw new Exception('Giỏ hàng của bạn đang trống.');
         }
 
-        return DB::transaction(function () use ($data, $user, $cartService, $cart) {
+        $order = DB::transaction(function () use ($data, $user, $cartService, $cart) {
             // 1. Verify stock for all items
             foreach ($cart as $item) {
                 $product = Product::lockForUpdate()->find($item['product_id']);
@@ -125,6 +125,7 @@ class OrderService
 
         // 7. Auto Push Order to GHN Shipping Service
         try {
+            $order->load(['items.product']);
             app(\App\Services\GHNOrderService::class)->create($order);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Auto Push to GHN error: ' . $e->getMessage());

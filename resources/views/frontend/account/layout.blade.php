@@ -37,7 +37,7 @@
                     <a href="{{ route('account.profile') }}" class="list-group-item list-group-item-action py-3 px-4 border-0 d-flex align-items-center {{ request()->routeIs('account.profile') ? 'active bg-primary text-white' : '' }}">
                         <i class="fa-solid fa-user-pen me-3" style="width: 20px;"></i> Thông tin cá nhân
                     </a>
-                    <a href="{{ route('account.orders*') }}" class="list-group-item list-group-item-action py-3 px-4 border-0 d-flex align-items-center {{ request()->routeIs('account.orders*') ? 'active bg-primary text-white' : '' }}">
+                    <a href="{{ route('account.orders') }}" class="list-group-item list-group-item-action py-3 px-4 border-0 d-flex align-items-center {{ request()->routeIs('account.orders*') ? 'active bg-primary text-white' : '' }}">
                         <i class="fa-solid fa-box-open me-3" style="width: 20px;"></i> Đơn hàng của tôi
                     </a>
                     <a href="{{ route('account.addresses') }}" class="list-group-item list-group-item-action py-3 px-4 border-0 d-flex align-items-center {{ request()->routeIs('account.addresses') ? 'active bg-primary text-white' : '' }}">

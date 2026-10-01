@@ -30,6 +30,11 @@ class NewFeaturesTest extends TestCase
         $verifyResponse->assertRedirect(route('account.profile'));
 
         $this->assertNotNull($user->fresh()->email_verified_at);
+
+        // Kiểm tra trang Profile hiển thị tốt
+        $profileResponse = $this->get('/account/profile');
+        $profileResponse->assertStatus(200);
+        $profileResponse->assertSee('Thông Tin Cá Nhân');
     }
 
     public function test_customer_can_send_and_retrieve_chat_messages(): void

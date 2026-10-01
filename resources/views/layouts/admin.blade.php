@@ -219,6 +219,15 @@
                     <span class="badge bg-danger ms-auto">{{ $unreadContactsCount }}</span>
                 @endif
             </a>
+            <a href="{{ route('admin.chats.index') }}" class="nav-link {{ request()->routeIs('admin.chats.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-comments"></i> Live Chat Khách Hàng
+                @php
+                    $unreadChatsCount = \App\Models\ChatMessage::where('sender_type', 'user')->where('is_read', false)->count();
+                @endphp
+                @if($unreadChatsCount > 0)
+                    <span class="badge bg-danger ms-auto">{{ $unreadChatsCount }}</span>
+                @endif
+            </a>
 
             <div class="sidebar-section-title">Hệ Thống & Báo Cáo</div>
             <a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">

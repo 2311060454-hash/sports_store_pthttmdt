@@ -140,6 +140,64 @@
 
     <!-- Right Column: Status Update & Customer Details -->
     <div class="col-lg-4">
+        <!-- GHN Shipping Integration Card -->
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fa-solid fa-truck-fast text-warning me-2"></i> Giao Hàng Nhanh (GHN)
+                </h5>
+                @if($order->ghn_order_code)
+                    {!! $order->ghn_status_badge !!}
+                @endif
+            </div>
+            <div class="card-body p-4">
+                @if($order->ghn_order_code)
+                    <div class="d-flex flex-column gap-2 small mb-3">
+                        <div><span class="text-muted">Mã vận đơn GHN:</span> <strong class="text-primary font-monospace fs-6">{{ $order->ghn_order_code }}</strong></div>
+                        <div><span class="text-muted">Cước phí GHN:</span> <strong class="text-danger">{{ number_format($order->ghn_fee, 0, ',', '.') }} ₫</strong></div>
+                        @if($order->ghn_expected_delivery)
+                            <div><span class="text-muted">Dự kiến giao:</span> <strong>{{ $order->ghn_expected_delivery->format('d/m/Y') }}</strong></div>
+                        @endif
+                    </div>
+
+                    @if(!empty($order->ghn_tracking_log))
+                        <div class="p-3 bg-light rounded-3 mb-3 border">
+                            <h6 class="fw-bold small mb-2"><i class="fa-solid fa-list-check me-1"></i> Nhật ký hành trình:</h6>
+                            <ul class="list-unstyled mb-0 small d-flex flex-column gap-2">
+                                @foreach($order->ghn_tracking_log as $log)
+                                    <li class="border-bottom pb-1">
+                                        <div class="fw-semibold text-dark">{{ $log['description'] ?? '' }}</div>
+                                        <small class="text-muted">{{ $log['time'] ?? '' }}</small>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if($order->ghn_status !== 'delivered' && $order->ghn_status !== 'cancel')
+                        <form action="{{ route('admin.orders.ghn.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy vận đơn GHN này?');">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+                                <i class="fa-solid fa-ban me-1"></i> Hủy Vận Đơn GHN
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    <p class="small text-muted mb-3">
+                        Đơn hàng chưa được đẩy sang hệ thống Giao Hàng Nhanh (GHN). Nhấn nút bên dưới để tạo vận đơn và lấy mã tracking tự động.
+                    </p>
+                    @if($order->status !== 'cancelled' && $order->status !== 'completed')
+                        <form action="{{ route('admin.orders.ghn.create', $order->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold text-dark">
+                                <i class="fa-solid fa-paper-plane me-1"></i> Đẩy Đơn Sang GHN Ngay
+                            </button>
+                        </form>
+                    @endif
+                @endif
+            </div>
+        </div>
+
         <!-- Status Progression Form -->
         <div class="card mb-4">
             <div class="card-header bg-white py-3">

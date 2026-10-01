@@ -612,6 +612,10 @@
             });
         });
     </script>
+
+    <!-- Floating Live Chat Widget -->
+    @include('partials.chat-widget')
+
     @stack('scripts')
 </body>
 </html>

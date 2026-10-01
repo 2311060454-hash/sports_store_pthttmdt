@@ -67,7 +67,13 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'Đăng ký tài khoản thành công! Chúc bạn có trải nghiệm mua sắm tuyệt vời tại Sport Store.');
+        try {
+            event(new \Illuminate\Auth\Events\Registered($user));
+        } catch (\Exception $e) {
+            // Không để lỗi SMTP làm hỏng quá trình đăng ký
+        }
+
+        return redirect()->route('verification.notice')->with('success', 'Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
     }
 
     public function logout(Request $request)

@@ -79,4 +79,19 @@ class AdminOrderController extends Controller
 
         return view('admin.orders.invoice', compact('order'));
     }
+
+    public function createGhn(Order $order, \App\Services\GhnService $ghnService)
+    {
+        $result = $ghnService->createShippingOrder($order);
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        }
+        return back()->with('error', $result['message'] ?? 'Tạo vận đơn GHN thất bại.');
+    }
+
+    public function cancelGhn(Order $order, \App\Services\GhnService $ghnService)
+    {
+        $ghnService->cancelShippingOrder($order);
+        return back()->with('success', 'Đã hủy vận đơn Giao Hàng Nhanh (GHN).');
+    }
 }

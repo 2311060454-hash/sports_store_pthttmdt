@@ -165,6 +165,54 @@
     </div>
 </div>
 
+<!-- GHN Tracking Info (If pushed to GHN) -->
+@if($order->ghn_order_code)
+<div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-primary overflow-hidden">
+    <div class="card-header bg-primary bg-opacity-10 py-3 px-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary px-3 py-2"><i class="fa-solid fa-truck-fast me-1"></i> Giao Hàng Nhanh (GHN)</span>
+            <span class="fw-bold text-dark">Mã vận đơn: <span class="font-monospace text-primary fs-6">{{ $order->ghn_order_code }}</span></span>
+        </div>
+        <span class="badge {{ $order->ghn_status_badge }} px-3 py-2 fs-6">
+            {{ $order->ghn_status_label }}
+        </span>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="text-muted small">Dự kiến giao hàng:</div>
+                <div class="fw-bold fs-6 text-success">
+                    <i class="fa-regular fa-calendar-check me-1"></i>
+                    {{ $order->ghn_expected_delivery ? $order->ghn_expected_delivery->format('d/m/Y H:i') : 'Đang cập nhật' }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">Cước phí GHN thực tế:</div>
+                <div class="fw-bold fs-6 text-dark">
+                    {{ $order->ghn_fee ? number_format($order->ghn_fee, 0, ',', '.') . ' ₫' : 'Đang cập nhật' }}
+                </div>
+            </div>
+        </div>
+
+        @if(!empty($order->ghn_tracking_log) && is_array($order->ghn_tracking_log))
+            <h6 class="fw-bold mb-3 small text-uppercase text-muted"><i class="fa-solid fa-route me-1"></i> Nhật ký hành trình vận chuyển</h6>
+            <div class="timeline-simple ps-2 border-start border-2 border-primary-subtle ms-2">
+                @foreach($order->ghn_tracking_log as $log)
+                    <div class="mb-3 position-relative ps-3">
+                        <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary" style="width: 10px; height: 10px; margin-top: 6px;"></div>
+                        <div class="fw-semibold small text-dark">{{ $log['status'] ?? 'Cập nhật trạng thái' }}</div>
+                        <div class="text-muted small" style="font-size: 0.8rem;">
+                            {{ isset($log['time']) ? \Carbon\Carbon::parse($log['time'])->format('d/m/Y H:i:s') : '' }}
+                            @if(isset($log['location'])) - {{ $log['location'] }} @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</div>
+@endif
+
 <!-- Shipping & Financial Summary -->
 <div class="row g-4">
     <div class="col-md-6">

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
                 CouponSeeder::class,
                 BannerSeeder::class,
                 OrderSeeder::class,
+                ChatMessageSeeder::class,
             ]);
         });
     }

@@ -44,9 +44,38 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Địa chỉ Email</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label fw-semibold mb-0">Địa chỉ Email</label>
+                        @if($user->hasVerifiedEmail())
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                <i class="fa-solid fa-circle-check me-1"></i> Đã xác thực
+                            </span>
+                        @else
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 small">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Chưa xác thực
+                            </span>
+                        @endif
+                    </div>
                     <input type="email" class="form-control bg-light" value="{{ $user->email }}" readonly disabled>
-                    <small class="text-muted">Email đăng nhập không thể thay đổi.</small>
+                    
+                    @if(!$user->hasVerifiedEmail())
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2 p-2 rounded-3 bg-warning bg-opacity-10 border border-warning-subtle">
+                            <span class="small text-muted">Tài khoản chưa được kích hoạt xác thực email.</span>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('verification.notice') }}" class="btn btn-sm btn-outline-warning text-dark py-1 px-2 rounded-pill small">
+                                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi link
+                                </a>
+                                <form method="POST" action="{{ route('verification.instant') }}" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-warning text-dark fw-bold py-1 px-2 rounded-pill small">
+                                        <i class="fa-solid fa-bolt me-1"></i> Xác thực ngay (Demo)
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <small class="text-muted">Email đăng nhập được bảo vệ và đã xác thực.</small>
+                    @endif
                 </div>
 
                 <div class="mb-3">

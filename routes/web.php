@@ -5,6 +5,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminBannerController;
 use App\Http\Controllers\AdminBrandController;
 use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminChatController;
 use App\Http\Controllers\AdminContactController;
 use App\Http\Controllers\AdminCouponController;
 use App\Http\Controllers\AdminCustomerController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminReviewController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\HomeController;
@@ -24,6 +26,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +57,10 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
 Route::post('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');
 
+// Live Chat (Customer)
+Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+
 // ========================
 // 2. AUTHENTICATION (GUEST)
 // ========================
@@ -69,6 +76,12 @@ Route::middleware('guest')->group(function () {
 // ========================
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Email Verification Routes
+    Route::get('/email/verify', [VerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
+    Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->middleware(['throttle:6,1'])->name('verification.send');
+    Route::post('/email/verify-instant', [VerificationController::class, 'instantVerify'])->name('verification.instant');
 
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
@@ -137,6 +150,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/{order}/ghn', [AdminOrderController::class, 'createGhn'])->name('orders.ghn.create');
+    Route::post('/orders/{order}/ghn/cancel', [AdminOrderController::class, 'cancelGhn'])->name('orders.ghn.cancel');
 
     // Customers
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
@@ -160,6 +175,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Contacts & Customer Messages
     Route::resource('contacts', AdminContactController::class)->only(['index', 'show', 'update', 'destroy']);
+
+    // Live Chat Support
+    Route::get('/chats', [AdminChatController::class, 'index'])->name('chats.index');
+    Route::get('/chats/{sessionId}/messages', [AdminChatController::class, 'getConversation'])->name('chats.messages');
+    Route::post('/chats/{sessionId}/reply', [AdminChatController::class, 'reply'])->name('chats.reply');
+    Route::get('/chats/unread-count', [AdminChatController::class, 'unreadCount'])->name('chats.unread');
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

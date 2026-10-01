@@ -26,6 +26,11 @@ class Order extends Model
         'status',
         'cancel_reason',
         'coupon_code',
+        'ghn_order_code',
+        'ghn_status',
+        'ghn_fee',
+        'ghn_expected_delivery',
+        'ghn_tracking_log',
     ];
 
     protected $casts = [
@@ -33,6 +38,9 @@ class Order extends Model
         'discount_amount' => 'float',
         'shipping_fee' => 'float',
         'total_amount' => 'float',
+        'ghn_fee' => 'float',
+        'ghn_expected_delivery' => 'datetime',
+        'ghn_tracking_log' => 'array',
     ];
 
     public function user()
@@ -88,6 +96,23 @@ class Order extends Model
             'bank_transfer' => 'Chuyển khoản ngân hàng',
             'vnpay' => 'VNPay QR / Thẻ nội địa',
             default => strtoupper($this->payment_method),
+        };
+    }
+
+    public function getGhnStatusLabelAttribute(): string
+    {
+        return \App\Services\GhnService::getStatusLabel($this->ghn_status);
+    }
+
+    public function getGhnStatusBadgeAttribute(): string
+    {
+        return match ($this->ghn_status) {
+            'ready_to_pick' => '<span class="badge bg-warning text-dark"><i class="fa-solid fa-box me-1"></i> Chờ lấy hàng</span>',
+            'picking' => '<span class="badge bg-info text-dark"><i class="fa-solid fa-truck-pickup me-1"></i> Đang lấy hàng</span>',
+            'delivering' => '<span class="badge bg-primary"><i class="fa-solid fa-truck-fast me-1"></i> Đang giao hàng</span>',
+            'delivered' => '<span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i> Giao thành công</span>',
+            'cancel' => '<span class="badge bg-danger"><i class="fa-solid fa-ban me-1"></i> Đã hủy vận đơn</span>',
+            default => '<span class="badge bg-secondary">' . ($this->ghn_status ?: 'Chưa tạo') . '</span>',
         };
     }
 }

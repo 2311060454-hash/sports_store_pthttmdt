@@ -21,11 +21,16 @@
             </div>
         </div>
 
-        @if($order->canBeCancelled())
-            <button type="button" class="btn btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
-                <i class="fa-solid fa-ban me-1"></i> Hủy đơn hàng này
-            </button>
-        @endif
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('account.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="fa-solid fa-print me-1"></i> In hóa đơn
+            </a>
+            @if($order->canBeCancelled())
+                <button type="button" class="btn btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                    <i class="fa-solid fa-ban me-1"></i> Hủy đơn hàng này
+                </button>
+            @endif
+        </div>
     </div>
 </div>
 

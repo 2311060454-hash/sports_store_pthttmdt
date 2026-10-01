@@ -37,6 +37,32 @@ class AddressController extends Controller
         return back()->with('success', 'Thêm địa chỉ giao hàng mới thành công!');
     }
 
+    public function update(AddressRequest $request, Address $address)
+    {
+        if ($address->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $user = Auth::user();
+        $isDefault = $request->boolean('is_default');
+
+        if ($isDefault) {
+            $user->addresses()->where('id', '!=', $address->id)->update(['is_default' => false]);
+        }
+
+        $address->update([
+            'receiver_name' => $request->receiver_name,
+            'phone' => $request->phone,
+            'province' => $request->province,
+            'district' => $request->district,
+            'ward' => $request->ward,
+            'address' => $request->address,
+            'is_default' => $isDefault || $address->is_default,
+        ]);
+
+        return back()->with('success', 'Cập nhật thông tin địa chỉ thành công!');
+    }
+
     public function setDefault(Address $address)
     {
         if ($address->user_id !== Auth::id()) {

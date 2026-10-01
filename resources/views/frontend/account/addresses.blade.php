@@ -30,24 +30,89 @@
                         <div class="text-secondary small mb-3">{{ $addr->full_address }}</div>
 
                         <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
-                            @if(!$addr->is_default)
-                                <form action="{{ route('account.addresses.default', $addr->id) }}" method="POST">
+                            <div class="d-flex align-items-center gap-2">
+                                @if(!$addr->is_default)
+                                    <form action="{{ route('account.addresses.default', $addr->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="btn btn-sm btn-link text-primary p-0 text-decoration-none">
+                                            Đặt mặc định
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="small text-success"><i class="fa-solid fa-check me-1"></i> Mặc định</span>
+                                @endif
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#editAddressModal_{{ $addr->id }}">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
+                                </button>
+                                <form action="{{ route('account.addresses.destroy', $addr->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
                                     @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="btn btn-sm btn-link text-primary p-0 text-decoration-none">
-                                        Đặt làm mặc định
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none">
+                                        <i class="fa-solid fa-trash me-1"></i> Xóa
                                     </button>
                                 </form>
-                            @else
-                                <span class="small text-success"><i class="fa-solid fa-check me-1"></i> Đang mặc định</span>
-                            @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <form action="{{ route('account.addresses.destroy', $addr->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                <!-- Modal Edit Address -->
+                <div class="modal fade" id="editAddressModal_{{ $addr->id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content rounded-4 border-0">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold">Chỉnh Sửa Địa Chỉ</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form action="{{ route('account.addresses.update', $addr->id) }}" method="POST">
                                 @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none">
-                                    <i class="fa-solid fa-trash me-1"></i> Xóa
-                                </button>
+                                @method('PUT')
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Họ tên người nhận <span class="text-danger">*</span></label>
+                                        <input type="text" name="receiver_name" class="form-control" value="{{ $addr->receiver_name }}" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="text" name="phone" class="form-control" value="{{ $addr->phone }}" required>
+                                    </div>
+
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold">Tỉnh/Thành <span class="text-danger">*</span></label>
+                                            <input type="text" name="province" class="form-control" value="{{ $addr->province }}" required>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold">Quận/Huyện <span class="text-danger">*</span></label>
+                                            <input type="text" name="district" class="form-control" value="{{ $addr->district }}" required>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold">Phường/Xã <span class="text-danger">*</span></label>
+                                            <input type="text" name="ward" class="form-control" value="{{ $addr->ward }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Địa chỉ cụ thể <span class="text-danger">*</span></label>
+                                        <input type="text" name="address" class="form-control" value="{{ $addr->address }}" required>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="is_default" value="1" id="is_default_{{ $addr->id }}" {{ $addr->is_default ? 'checked' : '' }}>
+                                        <label class="form-check-label small" for="is_default_{{ $addr->id }}">
+                                            Đặt làm địa chỉ nhận hàng mặc định
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Cập Nhật</button>
+                                </div>
                             </form>
                         </div>
                     </div>

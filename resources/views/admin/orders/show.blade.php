@@ -8,9 +8,14 @@
         <h4 class="fw-bold mb-1">Chi Tiết Đơn Hàng #{{ $order->order_code }}</h4>
         <p class="text-muted small mb-0">Đặt lúc {{ $order->created_at->format('d/m/Y H:i:s') }}</p>
     </div>
-    <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary rounded-pill px-3">
-        <i class="fa-solid fa-arrow-left me-1"></i> Danh sách đơn
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-dark rounded-pill px-3">
+            <i class="fa-solid fa-print me-1"></i> In hóa đơn
+        </a>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Danh sách đơn
+        </a>
+    </div>
 </div>
 
 <div class="row g-4">

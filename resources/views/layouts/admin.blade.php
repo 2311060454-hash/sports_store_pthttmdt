@@ -210,6 +210,15 @@
             <a href="{{ route('admin.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-star"></i> Đánh Giá Sản Phẩm
             </a>
+            <a href="{{ route('admin.contacts.index') }}" class="nav-link {{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-envelope-open-text"></i> Liên Hệ & Phản Hồi
+                @php
+                    $unreadContactsCount = \App\Models\Contact::where('status', 'unread')->count();
+                @endphp
+                @if($unreadContactsCount > 0)
+                    <span class="badge bg-danger ms-auto">{{ $unreadContactsCount }}</span>
+                @endif
+            </a>
 
             <div class="sidebar-section-title">Hệ Thống & Báo Cáo</div>
             <a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">

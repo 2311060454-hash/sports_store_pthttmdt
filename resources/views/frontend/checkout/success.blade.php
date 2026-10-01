@@ -37,6 +37,28 @@
                         <i class="fa-solid fa-truck-ramp-box me-2"></i>
                         Đơn hàng của bạn sẽ được nhân viên liên hệ xác nhận và tiến hành đóng gói giao đến địa chỉ trong 2-3 ngày làm việc. Quý khách vui lòng chuẩn bị số tiền <strong>{{ number_format($order->total_amount, 0, ',', '.') }} ₫</strong> khi nhận hàng.
                     </div>
+                @elseif($order->payment_method === 'vnpay')
+                    <div class="card border-0 bg-danger-subtle text-start rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h5 class="fw-bold mb-0 text-danger"><i class="fa-solid fa-qrcode me-2"></i> Cổng Thanh Toán VNPay QR</h5>
+                            <span class="badge {{ $order->payment_status === 'paid' ? 'bg-success' : 'bg-warning text-dark' }} px-3 py-2">
+                                {{ $order->payment_status === 'paid' ? 'Đã Thanh Toán' : 'Đang Chờ Thanh Toán' }}
+                            </span>
+                        </div>
+                        @if($order->payment_status !== 'paid')
+                            <p class="small text-secondary mb-3">
+                                Bạn đã chọn thanh toán qua <strong>VNPay</strong>. Trong môi trường kiểm thử/demo đồ án, bạn có thể nhấn nút bên dưới để mô phỏng luồng thanh toán thành công và cập nhật trạng thái đơn hàng ngay:
+                            </p>
+                            <a href="{{ route('payment.vnpay.callback', ['vnp_TxnRef' => $order->order_code, 'vnp_ResponseCode' => '00']) }}" class="btn btn-danger rounded-pill px-4 fw-bold">
+                                <i class="fa-solid fa-circle-check me-2"></i> Xác Nhận Thanh Toán VNPay (Mô Phỏng Demo)
+                            </a>
+                        @else
+                            <div class="alert alert-success d-flex align-items-center mb-0">
+                                <i class="fa-solid fa-circle-check fs-4 me-3"></i>
+                                <div>Giao dịch thanh toán trực tuyến qua <strong>VNPay</strong> đã được hệ thống xác nhận thành công!</div>
+                            </div>
+                        @endif
+                    </div>
                 @endif
 
                 <!-- Order Information Card -->
@@ -91,7 +113,10 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-center gap-3">
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ route('account.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-print me-2"></i> In Hóa Đơn
+                    </a>
                     <a href="{{ route('account.orders.show', $order->id) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
                         <i class="fa-solid fa-clock-rotate-left me-2"></i> Theo Dõi Đơn Hàng
                     </a>

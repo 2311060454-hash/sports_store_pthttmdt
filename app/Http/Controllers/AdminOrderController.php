@@ -72,4 +72,11 @@ class AdminOrderController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+
+    public function invoice(Order $order)
+    {
+        $order->load(['user', 'items.product', 'items.variant']);
+
+        return view('admin.orders.invoice', compact('order'));
+    }
 }

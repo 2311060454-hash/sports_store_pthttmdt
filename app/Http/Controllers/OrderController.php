@@ -64,4 +64,15 @@ class OrderController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+
+    public function invoice(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền xem hóa đơn này.');
+        }
+
+        $order->load(['user', 'items.product', 'items.variant']);
+
+        return view('frontend.account.invoice', compact('order'));
+    }
 }

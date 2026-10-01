@@ -320,9 +320,15 @@
                             </ul>
                         </li>
                         <li class="nav-link-item">
-                            <a class="nav-link text-danger {{ request()->filled('on_sale') ? 'active' : '' }}" href="{{ route('products.index', ['on_sale' => 1]) }}">
+                            <a class="nav-link text-danger {{ request()->routeIs('promotions') ? 'active fw-bold' : '' }}" href="{{ route('promotions') }}">
                                 <i class="fa-solid fa-fire me-1"></i> Khuyến mãi
                             </a>
+                        </li>
+                        <li class="nav-link-item">
+                            <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">Giới thiệu</a>
+                        </li>
+                        <li class="nav-link-item">
+                            <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Liên hệ</a>
                         </li>
                     </ul>
 
@@ -424,19 +430,19 @@
                 <div class="col-lg-2 col-md-6">
                     <h6>Về Chúng Tôi</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
-                        <li><a href="#">Giới thiệu cửa hàng</a></li>
-                        <li><a href="#">Hệ thống chi nhánh</a></li>
-                        <li><a href="#">Tuyển dụng</a></li>
-                        <li><a href="#">Liên hệ hợp tác</a></li>
+                        <li><a href="{{ route('about') }}">Giới thiệu cửa hàng</a></li>
+                        <li><a href="{{ route('promotions') }}">Khuyến mãi & Voucher</a></li>
+                        <li><a href="{{ route('contact') }}">Hệ thống showroom</a></li>
+                        <li><a href="{{ route('contact') }}">Liên hệ hỗ trợ</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h6>Chính Sách & Hỗ Trợ</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
-                        <li><a href="#">Chính sách giao hàng toàn quốc</a></li>
-                        <li><a href="#">Chính sách đổi trả trong 7 ngày</a></li>
-                        <li><a href="#">Bảo hành sản phẩm chính hãng</a></li>
-                        <li><a href="#">Hướng dẫn chọn kích cỡ thể thao</a></li>
+                        <li><a href="{{ route('about') }}">Chính sách giao hàng toàn quốc</a></li>
+                        <li><a href="{{ route('about') }}">Chính sách đổi trả trong 30 ngày</a></li>
+                        <li><a href="{{ route('about') }}">Bảo hành chính hãng 12 tháng</a></li>
+                        <li><a href="{{ route('contact') }}">Hỗ trợ tư vấn chọn size</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6">

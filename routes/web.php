@@ -5,6 +5,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminBannerController;
 use App\Http\Controllers\AdminBrandController;
 use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminContactController;
 use App\Http\Controllers\AdminCouponController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminDashboardController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WishlistController;
@@ -38,6 +40,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [ProductController::class, 'search'])->name('search');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact.submit');
+Route::get('/promotions', [PageController::class, 'promotions'])->name('promotions');
 
 // Shopping Cart & Coupons
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -80,11 +86,13 @@ Route::middleware('auth')->group(function () {
         // Orders
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
         // Addresses
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+        Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
         Route::put('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
         Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
 
@@ -127,6 +135,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Orders
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
 
     // Customers
@@ -148,6 +157,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Inventory
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::put('/inventory/{product}/quick-update', [AdminInventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
+
+    // Contacts & Customer Messages
+    Route::resource('contacts', AdminContactController::class)->only(['index', 'show', 'update', 'destroy']);
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

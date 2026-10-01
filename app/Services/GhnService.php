@@ -246,4 +246,28 @@ class GHNService
             return ['code' => -1, 'message' => $e->getMessage()];
         }
     }
+
+    public static function getStatusLabel(?string $status): string
+    {
+        return match ($status) {
+            'ready_to_pick' => 'Chờ lấy hàng',
+            'picking' => 'Đang lấy hàng',
+            'delivering' => 'Đang giao hàng',
+            'delivered' => 'Giao thành công',
+            'cancel' => 'Đã hủy vận đơn',
+            default => $status ? ucfirst(str_replace('_', ' ', $status)) : 'Chưa tạo',
+        };
+    }
+
+    public static function getStatusBadge(?string $status): string
+    {
+        return match ($status) {
+            'ready_to_pick' => 'bg-warning text-dark',
+            'picking' => 'bg-info text-dark',
+            'delivering' => 'bg-primary text-white',
+            'delivered' => 'bg-success text-white',
+            'cancel' => 'bg-danger text-white',
+            default => 'bg-secondary text-white',
+        };
+    }
 }

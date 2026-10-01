@@ -95,4 +95,40 @@ class NewFeaturesTest extends TestCase
             'message' => 'Dạ bên mình có mẫu Pegasus và Ultraboost nhé!',
         ]);
     }
+
+    public function test_ghn_location_endpoints(): void
+    {
+        $resProvinces = $this->getJson('/locations/provinces');
+        $resProvinces->assertStatus(200)
+            ->assertJsonStructure(['code', 'data']);
+
+        $resDistricts = $this->getJson('/locations/districts/201');
+        $resDistricts->assertStatus(200)
+            ->assertJsonStructure(['code', 'data']);
+
+        $resWards = $this->getJson('/locations/wards/1450');
+        $resWards->assertStatus(200)
+            ->assertJsonStructure(['code', 'data']);
+
+        $resFee = $this->postJson('/locations/calculate-fee', [
+            'to_district_id' => 1450,
+            'to_ward_code' => '20101',
+        ]);
+        $resFee->assertStatus(200)
+            ->assertJsonStructure(['code', 'data']);
+    }
+
+    public function test_admin_can_access_ghn_management_center(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin);
+
+        $res = $this->get('/admin/ghn');
+        $res->assertStatus(200)
+            ->assertSee('Đồng Bộ Giao Hàng Nhanh');
+    }
 }

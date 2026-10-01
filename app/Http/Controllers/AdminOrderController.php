@@ -80,18 +80,32 @@ class AdminOrderController extends Controller
         return view('admin.orders.invoice', compact('order'));
     }
 
-    public function createGhn(Order $order, \App\Services\GhnService $ghnService)
+    public function createGhn(Order $order, \App\Services\GHNOrderService $ghnOrderService)
     {
-        $result = $ghnService->createShippingOrder($order);
+        $result = $ghnOrderService->create($order);
         if ($result['success']) {
             return back()->with('success', $result['message']);
         }
         return back()->with('error', $result['message'] ?? 'Tạo vận đơn GHN thất bại.');
     }
 
-    public function cancelGhn(Order $order, \App\Services\GhnService $ghnService)
+    public function cancelGhn(Order $order, \App\Services\GHNService $ghnService)
     {
-        $ghnService->cancelShippingOrder($order);
+        if ($order->ghn_order_code) {
+            $ghnService->cancelOrder([$order->ghn_order_code]);
+        }
+        $log = $order->ghn_tracking_log ?? [];
+        $log[] = [
+            'status' => 'cancel',
+            'time' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Vận đơn GHN đã được hủy bởi cửa hàng.',
+        ];
+
+        $order->update([
+            'ghn_status' => 'cancel',
+            'ghn_tracking_log' => $log,
+        ]);
+
         return back()->with('success', 'Đã hủy vận đơn Giao Hàng Nhanh (GHN).');
     }
 }

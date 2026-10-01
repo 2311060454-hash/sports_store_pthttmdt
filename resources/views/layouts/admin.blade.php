@@ -201,6 +201,9 @@
             <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Đơn Hàng
             </a>
+            <a href="{{ route('admin.ghn.index') }}" class="nav-link {{ request()->routeIs('admin.ghn.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-truck-fast"></i> Đồng Bộ GHN
+            </a>
             <a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Khách Hàng
             </a>

@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminContactController;
 use App\Http\Controllers\AdminCouponController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminGhnController;
 use App\Http\Controllers\AdminInventoryController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminProductController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\GHNController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\OrderController;
@@ -56,6 +58,14 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
 Route::post('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');
+
+// GHN Shipping Locations & Fee Calculation (Lab 05)
+Route::prefix('locations')->name('locations.')->group(function () {
+    Route::get('/provinces', [GHNController::class, 'getProvinces'])->name('provinces');
+    Route::get('/districts/{provinceId}', [GHNController::class, 'getDistricts'])->name('districts');
+    Route::get('/wards/{districtId}', [GHNController::class, 'getWards'])->name('wards');
+    Route::post('/calculate-fee', [GHNController::class, 'getShippingFee'])->name('fee');
+});
 
 // Live Chat (Customer)
 Route::get('/chat/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
@@ -152,6 +162,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{order}/ghn', [AdminOrderController::class, 'createGhn'])->name('orders.ghn.create');
     Route::post('/orders/{order}/ghn/cancel', [AdminOrderController::class, 'cancelGhn'])->name('orders.ghn.cancel');
+
+    // Giao Hàng Nhanh (GHN) Center
+    Route::get('/ghn', [AdminGhnController::class, 'index'])->name('ghn.index');
+    Route::post('/ghn/settings', [AdminGhnController::class, 'updateSettings'])->name('ghn.settings');
+    Route::get('/ghn/test-connection', [AdminGhnController::class, 'testConnection'])->name('ghn.test');
 
     // Customers
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');

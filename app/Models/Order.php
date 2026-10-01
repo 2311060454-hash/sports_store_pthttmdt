@@ -31,6 +31,9 @@ class Order extends Model
         'ghn_fee',
         'ghn_expected_delivery',
         'ghn_tracking_log',
+        'to_district_id',
+        'to_ward_code',
+        'ghn_total_fee',
     ];
 
     protected $casts = [
@@ -39,6 +42,8 @@ class Order extends Model
         'shipping_fee' => 'float',
         'total_amount' => 'float',
         'ghn_fee' => 'float',
+        'ghn_total_fee' => 'integer',
+        'to_district_id' => 'integer',
         'ghn_expected_delivery' => 'datetime',
         'ghn_tracking_log' => 'array',
     ];

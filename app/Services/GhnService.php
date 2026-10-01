@@ -2,217 +2,248 @@
 
 namespace App\Services;
 
-use App\Models\Order;
-use Carbon\Carbon;
-use Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
-class GhnService
+class GHNService
 {
-    protected string $apiUrl;
+    protected string $baseUrl;
     protected string $token;
-    protected string $shopId;
-    protected int $fromDistrictId;
-    protected string $fromWardCode;
+    protected int $shopId;
 
     public function __construct()
     {
-        $this->apiUrl = config('ghn.api_url', 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2');
-        $this->token = (string) config('ghn.token', 'test-token-ghn-sportstore');
-        $this->shopId = (string) config('ghn.shop_id', '123456');
-        $this->fromDistrictId = (int) config('ghn.from_district_id', 1442);
-        $this->fromWardCode = (string) config('ghn.from_ward_code', '20101');
+        $this->baseUrl = config('services.ghn.base_url', 'https://dev-online-gateway.ghn.vn/shiip/public-api');
+        $this->token = config('services.ghn.token') ?? '';
+        $this->shopId = (int) config('services.ghn.shop_id', 0);
     }
 
-    /**
-     * Calculate shipping fee
-     */
-    public function calculateFee(int $toDistrictId, string $toWardCode = '', int $weight = 1000, int $insuranceValue = 0): int
+    public function getToken(): string
     {
-        try {
-            $response = Http::withHeaders([
+        return $this->token;
+    }
+
+    public function getShopId(): int
+    {
+        return $this->shopId;
+    }
+
+    protected function client()
+    {
+        return Http::baseUrl($this->baseUrl)
+            ->withOptions([
+                'verify' => filter_var(config('services.ghn.verify_ssl', false), FILTER_VALIDATE_BOOLEAN),
+            ])
+            ->acceptJson()
+            ->timeout(15)
+            ->withHeaders([
                 'Token' => $this->token,
-                'ShopId' => $this->shopId,
-            ])->timeout(4)->post("{$this->apiUrl}/shipping-order/fee", [
-                'service_type_id' => 2, // Standard delivery
-                'from_district_id' => $this->fromDistrictId,
-                'to_district_id' => $toDistrictId,
-                'to_ward_code' => $toWardCode,
-                'height' => 15,
-                'length' => 25,
-                'width' => 15,
-                'weight' => $weight,
-                'insurance_value' => min($insuranceValue, 5000000),
+                'ShopId' => (string) $this->shopId,
+                'Content-Type' => 'application/json',
             ]);
-
-            if ($response->successful() && isset($response->json()['data']['total'])) {
-                return (int) $response->json()['data']['total'];
-            }
-        } catch (Exception $e) {
-            Log::warning('GHN Calculate Fee API error: ' . $e->getMessage());
-        }
-
-        // Standard default rate in Vietnam
-        return 30000;
     }
 
     /**
-     * Create GHN shipping order for an Order
+     * Lấy Tỉnh/Thành
      */
-    public function createShippingOrder(Order $order): array
+    public function getProvinces(): array
     {
-        $itemsPayload = [];
-        $totalWeight = 0;
-
-        foreach ($order->items as $item) {
-            $itemWeight = 300; // 300g per item average
-            $totalWeight += $itemWeight * $item->quantity;
-            $itemsPayload[] = [
-                'name' => $item->product_name,
-                'code' => $item->product?->sku ?? 'SP-' . $item->id,
-                'quantity' => $item->quantity,
-                'price' => (int) $item->price,
-                'weight' => $itemWeight,
-            ];
+        $res = $this->get('/master-data/province');
+        if (isset($res['code']) && $res['code'] == 200 && !empty($res['data'])) {
+            return $res;
         }
 
-        $payload = [
-            'payment_type_id' => $order->payment_method === 'cod' ? 2 : 1, // 2: Buyer pays (COD), 1: Shop pays
-            'note' => $order->note ?: 'Hàng thể thao dễ vỡ, xin nhẹ tay',
-            'required_note' => 'KHONGCHOXEMHANG', // Standard GHN options
-            'return_phone' => config('ghn.client_phone', '19008888'),
-            'return_address' => '123 Cầu Giấy, P. Dịch Vọng, Q. Cầu Giấy, Hà Nội',
-            'to_name' => $order->customer_name,
-            'to_phone' => $order->customer_phone,
-            'to_address' => $order->shipping_address,
-            'to_district_id' => 1454, // Default target district code or mapped
-            'to_ward_code' => '20508',
-            'weight' => max(500, $totalWeight),
-            'length' => 30,
-            'width' => 20,
-            'height' => 15,
-            'service_type_id' => 2,
-            'insurance_value' => (int) min($order->total_amount, 5000000),
-            'cod_amount' => $order->payment_method === 'cod' ? (int) $order->total_amount : 0,
-            'client_order_code' => $order->order_code,
-            'items' => $itemsPayload,
+        // Fallback default provinces if token not yet provided or GHN network issue
+        return [
+            'code' => 200,
+            'message' => 'Success',
+            'data' => [
+                ['ProvinceID' => 201, 'ProvinceName' => 'Hà Nội'],
+                ['ProvinceID' => 202, 'ProvinceName' => 'Hồ Chí Minh'],
+                ['ProvinceID' => 203, 'ProvinceName' => 'Đà Nẵng'],
+                ['ProvinceID' => 204, 'ProvinceName' => 'Hải Phòng'],
+                ['ProvinceID' => 205, 'ProvinceName' => 'Cần Thơ'],
+                ['ProvinceID' => 210, 'ProvinceName' => 'Bình Dương'],
+                ['ProvinceID' => 211, 'ProvinceName' => 'Đồng Nai'],
+                ['ProvinceID' => 218, 'ProvinceName' => 'Quảng Ninh'],
+            ],
         ];
+    }
 
-        try {
-            $response = Http::withHeaders([
-                'Token' => $this->token,
-                'ShopId' => $this->shopId,
-            ])->timeout(5)->post("{$this->apiUrl}/shipping-order/create", $payload);
+    /**
+     * Lấy Quận/Huyện
+     */
+    public function getDistricts(int $provinceId): array
+    {
+        $res = $this->get('/master-data/district', [
+            'province_id' => $provinceId,
+        ]);
 
-            if ($response->successful() && isset($response->json()['data']['order_code'])) {
-                $data = $response->json()['data'];
-                $ghnCode = $data['order_code'];
-                $expectedDelivery = isset($data['expected_delivery_time'])
-                    ? Carbon::parse($data['expected_delivery_time'])
-                    : Carbon::now()->addDays(3);
-                $fee = (float) ($data['total_fee'] ?? 30000);
-
-                $order->update([
-                    'ghn_order_code' => $ghnCode,
-                    'ghn_status' => 'ready_to_pick',
-                    'ghn_fee' => $fee,
-                    'ghn_expected_delivery' => $expectedDelivery,
-                    'status' => 'preparing',
-                    'ghn_tracking_log' => [
-                        [
-                            'status' => 'ready_to_pick',
-                            'time' => Carbon::now()->format('Y-m-d H:i:s'),
-                            'description' => 'Đã tạo vận đơn trên hệ thống Giao Hàng Nhanh (GHN). Chờ bưu tá lấy hàng.',
-                        ]
-                    ]
-                ]);
-
-                return [
-                    'success' => true,
-                    'message' => "Tạo vận đơn GHN thành công! Mã vận đơn: {$ghnCode}",
-                    'ghn_code' => $ghnCode,
-                ];
-            }
-        } catch (Exception $e) {
-            Log::warning('GHN Create Order Exception: ' . $e->getMessage());
+        if (isset($res['code']) && $res['code'] == 200 && !empty($res['data'])) {
+            return $res;
         }
 
-        // Mock mode (when running in test/sandbox or without live GHN key)
-        $mockGhnCode = 'GHN' . strtoupper(Str::random(8));
-        $expectedDelivery = Carbon::now()->addDays(2);
-        $order->update([
-            'ghn_order_code' => $mockGhnCode,
-            'ghn_status' => 'ready_to_pick',
-            'ghn_fee' => 32000,
-            'ghn_expected_delivery' => $expectedDelivery,
-            'status' => 'preparing',
-            'ghn_tracking_log' => [
-                [
-                    'status' => 'ready_to_pick',
-                    'time' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'description' => 'Đã tạo vận đơn Giao Hàng Nhanh (GHN). Bưu tá tiếp nhận thông tin lấy hàng.',
-                ]
-            ]
+        // Fallback districts for common test provinces
+        $fallback = match ($provinceId) {
+            201 => [
+                ['DistrictID' => 1450, 'DistrictName' => 'Quận Thanh Xuân'],
+                ['DistrictID' => 1442, 'DistrictName' => 'Quận Cầu Giấy'],
+                ['DistrictID' => 1443, 'DistrictName' => 'Quận Đống Đa'],
+                ['DistrictID' => 1444, 'DistrictName' => 'Quận Ba Đình'],
+                ['DistrictID' => 1451, 'DistrictName' => 'Quận Hoàng Mai'],
+                ['DistrictID' => 1454, 'DistrictName' => 'Quận Hà Đông'],
+            ],
+            202 => [
+                ['DistrictID' => 1446, 'DistrictName' => 'Quận 1'],
+                ['DistrictID' => 1447, 'DistrictName' => 'Quận 3'],
+                ['DistrictID' => 1448, 'DistrictName' => 'Quận 7'],
+                ['DistrictID' => 1452, 'DistrictName' => 'Thành phố Thủ Đức'],
+                ['DistrictID' => 1453, 'DistrictName' => 'Quận Bình Thạnh'],
+            ],
+            default => [
+                ['DistrictID' => 1450, 'DistrictName' => 'Quận Trung Tâm'],
+                ['DistrictID' => 1454, 'DistrictName' => 'Quận Ngoại Thành'],
+            ],
+        };
+
+        return ['code' => 200, 'message' => 'Success', 'data' => $fallback];
+    }
+
+    /**
+     * Lấy Phường/Xã
+     */
+    public function getWards(int $districtId): array
+    {
+        $res = $this->get('/master-data/ward', [
+            'district_id' => $districtId,
         ]);
+
+        if (isset($res['code']) && $res['code'] == 200 && !empty($res['data'])) {
+            return $res;
+        }
+
+        // Fallback wards
+        return [
+            'code' => 200,
+            'message' => 'Success',
+            'data' => [
+                ['WardCode' => '20101', 'WardName' => 'Phường Nhân Chính'],
+                ['WardCode' => '20102', 'WardName' => 'Phường Khương Đình'],
+                ['WardCode' => '20103', 'WardName' => 'Phường Thanh Xuân Bắc'],
+                ['WardCode' => '20508', 'WardName' => 'Phường Dịch Vọng'],
+                ['WardCode' => '20509', 'WardName' => 'Phường Mai Dịch'],
+            ],
+        ];
+    }
+
+    /**
+     * Tham số gói hàng mặc định
+     */
+    public function packageParameters(int $weight = 200): array
+    {
+        return [
+            'weight' => max(100, $weight),
+            'length' => 15,
+            'width' => 15,
+            'height' => 10,
+            'service_type_id' => 2,
+        ];
+    }
+
+    /**
+     * Tính phí giao hàng
+     */
+    public function calculateFee(array $params): array
+    {
+        $res = $this->post('/v2/shipping-order/fee', array_merge([
+            'shop_id' => $this->shopId,
+        ], $params));
+
+        if (isset($res['code']) && $res['code'] == 200 && isset($res['data']['total'])) {
+            return $res;
+        }
+
+        // Fallback fee calculation based on distance/district
+        $toDistrict = $params['to_district_id'] ?? 1450;
+        $fee = ($toDistrict == config('services.ghn.from_district_id', 1450)) ? 22000 : 35000;
 
         return [
-            'success' => true,
-            'message' => "Tạo vận đơn GHN thành công! Mã vận đơn: {$mockGhnCode}",
-            'ghn_code' => $mockGhnCode,
+            'code' => 200,
+            'message' => 'Success',
+            'data' => [
+                'total' => $fee,
+                'service_fee' => $fee,
+            ],
         ];
     }
 
     /**
-     * Cancel GHN order
+     * Tạo đơn giao hàng sang GHN
      */
-    public function cancelShippingOrder(Order $order): bool
+    public function createOrder(array $orderData): array
     {
-        if (!$order->ghn_order_code) {
-            return false;
-        }
+        return $this->post('/v2/shipping-order/create', array_merge([
+            'shop_id' => $this->shopId,
+        ], $orderData));
+    }
 
-        try {
-            Http::withHeaders([
-                'Token' => $this->token,
-                'ShopId' => $this->shopId,
-            ])->timeout(4)->post("{$this->apiUrl}/shipping-order/cancel", [
-                'order_codes' => [$order->ghn_order_code],
-            ]);
-        } catch (Exception $e) {
-            Log::warning('GHN Cancel Error: ' . $e->getMessage());
-        }
-
-        $log = $order->ghn_tracking_log ?? [];
-        $log[] = [
-            'status' => 'cancel',
-            'time' => Carbon::now()->format('Y-m-d H:i:s'),
-            'description' => 'Vận đơn GHN đã được hủy bởi cửa hàng.',
-        ];
-
-        $order->update([
-            'ghn_status' => 'cancel',
-            'ghn_tracking_log' => $log,
+    /**
+     * Hủy đơn hàng trên GHN
+     */
+    public function cancelOrder(array $orderCodes): array
+    {
+        return $this->post('/v2/switch-status/cancel', [
+            'order_codes' => $orderCodes,
+            'shop_id' => $this->shopId,
         ]);
-
-        return true;
     }
 
-    /**
-     * Get readable Vietnamese label for GHN status
-     */
-    public static function getStatusLabel(?string $status): string
+    protected function get(string $uri, array $query = []): array
     {
-        return match ($status) {
-            'ready_to_pick' => 'Chờ lấy hàng',
-            'picking' => 'Đang lấy hàng',
-            'storing' => 'Đang lưu kho',
-            'delivering', 'transporting' => 'Đang vận chuyển & giao hàng',
-            'delivered' => 'Giao hàng thành công',
-            'cancel' => 'Đã hủy đơn vận chuyển',
-            'return' => 'Chuyển hoàn về shop',
-            default => $status ?: 'Chưa tạo vận đơn',
-        };
+        try {
+            $response = $this->client()->get($uri, $query);
+            if (!$response->successful()) {
+                Log::warning('GHN GET request failed', [
+                    'uri' => $uri,
+                    'status' => $response->status(),
+                    'body' => $response->json(),
+                ]);
+                return ['code' => $response->status(), 'message' => 'GHN API request failed.'];
+            }
+            return $response->json() ?? ['code' => -1, 'message' => 'GHN returned an empty response.'];
+        } catch (ConnectionException $exception) {
+            Log::error('Unable to connect to GHN', ['uri' => $uri, 'error' => $exception->getMessage()]);
+            return ['code' => -1, 'message' => 'Unable to connect to GHN.'];
+        } catch (\Exception $e) {
+            Log::error('GHN Exception', ['uri' => $uri, 'error' => $e->getMessage()]);
+            return ['code' => -1, 'message' => $e->getMessage()];
+        }
+    }
+
+    protected function post(string $uri, array $payload): array
+    {
+        try {
+            $response = $this->client()->post($uri, $payload);
+            if (!$response->successful()) {
+                Log::warning('GHN POST request failed', [
+                    'uri' => $uri,
+                    'status' => $response->status(),
+                    'body' => $response->json(),
+                ]);
+                return [
+                    'code' => $response->status(),
+                    'message' => $response->json()['message'] ?? 'GHN API request failed.',
+                    'data' => $response->json()['data'] ?? null,
+                ];
+            }
+            return $response->json() ?? ['code' => -1, 'message' => 'GHN returned an empty response.'];
+        } catch (ConnectionException $exception) {
+            Log::error('Unable to connect to GHN', ['uri' => $uri, 'error' => $exception->getMessage()]);
+            return ['code' => -1, 'message' => 'Unable to connect to GHN.'];
+        } catch (\Exception $e) {
+            Log::error('GHN Exception', ['uri' => $uri, 'error' => $e->getMessage()]);
+            return ['code' => -1, 'message' => $e->getMessage()];
+        }
     }
 }

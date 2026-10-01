@@ -2,7 +2,7 @@
 
 @section('title', 'Trung Tâm Live Chat Khách Hàng - Quản Trị Sport Store')
 
-@section('admin_content')
+@section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="fw-bold mb-1"><i class="fa-solid fa-comments me-2 text-primary"></i> Live Chat Khách Hàng</h4>

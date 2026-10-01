@@ -54,8 +54,10 @@ class OrderService
             // 2. Calculations
             $subtotal = $cartService->getSubtotal();
             $discount = $cartService->getDiscount();
-            $shippingFee = $cartService->getShippingFee();
-            $totalAmount = $cartService->getTotal();
+            $shippingFee = isset($data['shipping_fee']) && is_numeric($data['shipping_fee']) 
+                ? (float) $data['shipping_fee'] 
+                : $cartService->getShippingFee();
+            $totalAmount = max(0, $subtotal - $discount + $shippingFee);
             $coupon = $cartService->getCoupon();
             $couponCode = $coupon ? $coupon['code'] : null;
 
@@ -68,10 +70,13 @@ class OrderService
                 'customer_phone' => $data['customer_phone'],
                 'customer_email' => $data['customer_email'],
                 'shipping_address' => $data['shipping_address'],
+                'to_district_id' => $data['to_district_id'] ?? null,
+                'to_ward_code' => $data['to_ward_code'] ?? null,
                 'note' => $data['note'] ?? null,
                 'subtotal' => $subtotal,
                 'discount_amount' => $discount,
                 'shipping_fee' => $shippingFee,
+                'ghn_total_fee' => (int) $shippingFee,
                 'total_amount' => $totalAmount,
                 'payment_method' => $data['payment_method'],
                 'payment_status' => 'unpaid',
@@ -117,6 +122,15 @@ class OrderService
 
             return $order;
         });
+
+        // 7. Auto Push Order to GHN Shipping Service
+        try {
+            app(\App\Services\GHNOrderService::class)->create($order);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Auto Push to GHN error: ' . $e->getMessage());
+        }
+
+        return $order->fresh();
     }
 
     /**

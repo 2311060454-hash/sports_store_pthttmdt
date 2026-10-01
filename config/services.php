@@ -40,7 +40,10 @@ return [
         'token' => env('GHN_TOKEN', ''),
         'shop_id' => env('GHN_SHOP_ID', 0),
         'verify_ssl' => filter_var(env('GHN_VERIFY_SSL', false), FILTER_VALIDATE_BOOLEAN),
-        'from_district_id' => (int) env('GHN_FROM_DISTRICT_ID', 1450),
+        'from_district_id' => (int) env('GHN_FROM_DISTRICT_ID', 1583),
+        'from_ward_code' => env('GHN_FROM_WARD_CODE', '1A1405'),
+        'return_address' => env('GHN_RETURN_ADDRESS', 'Xã Đức Hoà, Huyện Sóc Sơn, Hà Nội'),
+        'client_phone' => env('GHN_CLIENT_PHONE', '0854571834'),
         'default_weight' => (int) env('GHN_DEFAULT_WEIGHT', 200),
     ],
 

@@ -39,6 +39,8 @@ class GHNOrderService
             'payment_type_id' => $isOrderPaid ? 1 : 2,
             'note' => 'Đơn hàng #' . $order->order_code . ($order->note ? ' - ' . $order->note : ''),
             'required_note' => 'KHONGCHOXEMHANG',
+            'return_phone' => config('services.ghn.client_phone', '0854571834'),
+            'return_address' => config('services.ghn.return_address', 'Xã Đức Hoà, Huyện Sóc Sơn, Hà Nội'),
             'to_name' => $order->customer_name,
             'to_phone' => $order->customer_phone,
             'to_address' => $order->shipping_address,

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('password');
             $table->string('avatar')->nullable();
-            $table->enum('role', ['admin', 'customer'])->default('customer')->index();
+            $table->enum('role', ['admin', 'customer', 'user'])->default('customer')->index();
             $table->enum('status', ['active', 'inactive'])->default('active')->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

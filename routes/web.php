@@ -16,6 +16,8 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminReviewController;
+use App\Http\Controllers\Admin\FinanceController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
@@ -166,13 +168,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('products', AdminProductController::class);
     Route::delete('/products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.images.delete');
 
-    // Orders
+    // Orders (Lab Admin Order)
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('/orders/{order}/ghn', [AdminOrderController::class, 'createGhn'])->name('orders.ghn.create');
     Route::post('/orders/{order}/ghn/cancel', [AdminOrderController::class, 'cancelGhn'])->name('orders.ghn.cancel');
+
+    // Users Management (Lab Admin User)
+    Route::resource('users', AdminUserController::class);
+
+    // Finance & Payment Transactions (Lab Finance)
+    Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
+    Route::get('/finance/transactions', [FinanceController::class, 'transactions'])->name('finance.transactions');
+    Route::patch('/finance/{order}/status', [FinanceController::class, 'updateStatus'])->name('finance.update-status');
 
     // Giao Hàng Nhanh (GHN) Center
     Route::get('/ghn', [AdminGhnController::class, 'index'])->name('ghn.index');
@@ -208,6 +219,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/chats/{sessionId}/reply', [AdminChatController::class, 'reply'])->name('chats.reply');
     Route::get('/chats/unread-count', [AdminChatController::class, 'unreadCount'])->name('chats.unread');
 
-    // Reports
+    // Reports (Lab Admin Report)
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/charts', [AdminReportController::class, 'charts'])->name('reports.charts');
 });

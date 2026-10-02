@@ -197,18 +197,29 @@
                 <i class="fa-solid fa-warehouse"></i> Quản Lý Tồn Kho
             </a>
 
-            <div class="sidebar-section-title">Bán Hàng & Khách Hàng</div>
+            <div class="sidebar-section-title">Bán Hàng & Tài Chính</div>
             <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Đơn Hàng
+            </a>
+            <a href="{{ route('admin.finance.index') }}" class="nav-link {{ request()->routeIs('admin.finance.index') ? 'active' : '' }}">
+                <i class="fa-solid fa-chart-pie"></i> Thống Kê Tài Chính
+            </a>
+            <a href="{{ route('admin.finance.transactions') }}" class="nav-link {{ request()->routeIs('admin.finance.transactions') ? 'active' : '' }}">
+                <i class="fa-solid fa-receipt"></i> Giao Dịch Thanh Toán
             </a>
             <a href="{{ route('admin.ghn.index') }}" class="nav-link {{ request()->routeIs('admin.ghn.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-truck-fast"></i> Đồng Bộ GHN
             </a>
-            <a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-users"></i> Khách Hàng
-            </a>
             <a href="{{ route('admin.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-ticket"></i> Mã Giảm Giá
+            </a>
+
+            <div class="sidebar-section-title">Khách Hàng & Người Dùng</div>
+            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-shield"></i> Quản Lý Người Dùng
+            </a>
+            <a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-users"></i> Khách Hàng
             </a>
             <a href="{{ route('admin.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-star"></i> Đánh Giá Sản Phẩm

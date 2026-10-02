@@ -103,9 +103,22 @@ class ProductController extends Controller
             }
         }
 
+        // Recently viewed products tracking (Personalization & Recommendations)
+        $recentlyViewedIds = session()->get('recently_viewed', []);
+        $recentlyViewedIds = array_diff($recentlyViewedIds, [$product->id]);
+        array_unshift($recentlyViewedIds, $product->id);
+        $recentlyViewedIds = array_slice($recentlyViewedIds, 0, 8);
+        session()->put('recently_viewed', $recentlyViewedIds);
+
+        $recentlyViewed = Product::with(['category', 'brand', 'reviews'])
+            ->whereIn('id', array_slice($recentlyViewedIds, 1, 4))
+            ->where('status', 'active')
+            ->get();
+
         return view('frontend.products.show', compact(
             'product',
             'relatedProducts',
+            'recentlyViewed',
             'canReview',
             'eligibleOrderId'
         ));

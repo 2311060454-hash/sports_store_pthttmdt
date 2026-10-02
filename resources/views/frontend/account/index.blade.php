@@ -7,6 +7,29 @@
 @endsection
 
 @section('account_content')
+<!-- Loyalty & Membership Tier Card (Chương trình khách hàng thân thiết) -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <span class="badge bg-warning text-dark fw-bold text-uppercase px-3 py-1 mb-2">
+                <i class="fa-solid fa-crown me-1"></i> Hạng Hội Viên: {{ $tierName }}
+            </span>
+            <h4 class="fw-bold mb-1 text-white">{{ $user->name }}</h4>
+            <p class="small text-light opacity-75 mb-0">
+                <i class="fa-solid fa-coins text-warning me-1"></i> Điểm tích lũy: <strong class="text-warning fs-6">{{ number_format($loyaltyPoints) }}</strong> điểm 
+                (Tổng chi tiêu: {{ number_format($totalSpent, 0, ',', '.') }} ₫)
+            </p>
+        </div>
+        <div class="text-end">
+            <span class="small text-light opacity-75 d-block mb-1">Mục tiêu nâng hạng: {{ number_format($tierNext) }} điểm</span>
+            <div class="progress bg-white bg-opacity-25" style="height: 8px; width: 140px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $tierProgress }}%;" aria-valuenow="{{ $tierProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small class="text-warning" style="font-size: 0.72rem;">Đạt {{ $tierProgress }}% tiến độ</small>
+        </div>
+    </div>
+</div>
+
 <!-- KPI Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">

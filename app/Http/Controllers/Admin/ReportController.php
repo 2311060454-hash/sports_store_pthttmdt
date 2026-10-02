@@ -80,11 +80,29 @@ class ReportController extends Controller
     }
 
     /**
+     * Top sản phẩm bán chạy nhất
+     */
+    private function bestSellingProducts(int $limit = 10): Collection
+    {
+        return DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->whereIn('order_items.order_id', $this->paidOrders()->select('orders.id'))
+            ->select('products.id', 'products.name', 'products.sku', 'products.price', 'categories.name as category_name')
+            ->selectRaw('SUM(order_items.quantity) as total_sold, SUM(order_items.price * order_items.quantity) as total_revenue')
+            ->groupBy('products.id', 'products.name', 'products.sku', 'products.price', 'categories.name')
+            ->orderByDesc('total_sold')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
      * Bảng số liệu báo cáo
      */
     public function index()
     {
         $categoryRevenue = $this->categoryRevenue();
+        $bestSellingProducts = $this->bestSellingProducts();
         $totalOrders = Order::where('created_at', '<=', now())->count();
         $totalCustomers = DB::table('users')->whereIn('role', ['user', 'customer'])->count();
         $revenueByDate = $this->dailyRevenue();
@@ -93,7 +111,7 @@ class ReportController extends Controller
         $totalRevenue = $revenueByDate->sum('total_revenue');
 
         return view('admin.reports.index', compact(
-            'categoryRevenue', 'totalOrders', 'totalCustomers', 'totalRevenue',
+            'categoryRevenue', 'bestSellingProducts', 'totalOrders', 'totalCustomers', 'totalRevenue',
             'revenueByDate', 'revenueByMonth', 'revenueByYear'
         ));
     }

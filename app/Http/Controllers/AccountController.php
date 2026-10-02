@@ -17,7 +17,27 @@ class AccountController extends Controller
         $totalOrdersCount = $user->orders()->count();
         $wishlistCount = $user->wishlists()->count();
 
-        return view('frontend.account.index', compact('user', 'recentOrders', 'totalOrdersCount', 'wishlistCount'));
+        // Loyalty & Rewards calculation (Chương trình khách hàng thân thiết)
+        $totalSpent = (float) $user->orders()
+            ->where(function ($q) {
+                $q->where('payment_status', 'paid')
+                  ->orWhereIn('status', ['completed', 'shipping', 'delivered']);
+            })
+            ->sum('total_amount');
+
+        $loyaltyPoints = (int) floor($totalSpent / 10000);
+
+        [$tierName, $tierColor, $tierNext, $tierProgress] = match (true) {
+            $loyaltyPoints >= 5000 => ['Kim Cương', 'info', 5000, 100],
+            $loyaltyPoints >= 2000 => ['Vàng', 'warning', 5000, min(100, (int)(($loyaltyPoints - 2000) / 3000 * 100))],
+            $loyaltyPoints >= 500  => ['Bạc', 'secondary', 2000, min(100, (int)(($loyaltyPoints - 500) / 1500 * 100))],
+            default                => ['Đồng', 'dark', 500, min(100, (int)($loyaltyPoints / 500 * 100))],
+        };
+
+        return view('frontend.account.index', compact(
+            'user', 'recentOrders', 'totalOrdersCount', 'wishlistCount',
+            'totalSpent', 'loyaltyPoints', 'tierName', 'tierColor', 'tierNext', 'tierProgress'
+        ));
     }
 
     public function profile()

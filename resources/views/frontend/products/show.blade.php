@@ -164,6 +164,20 @@
                             </div>
                         @endif
                     </form>
+
+                    <!-- Social Sharing (Yêu cầu Mạng xã hội / Chia sẻ sản phẩm) -->
+                    <div class="d-flex align-items-center gap-2 mt-4 pt-3 border-top">
+                        <span class="small text-muted fw-semibold me-2"><i class="fa-solid fa-share-nodes me-1"></i> Chia sẻ:</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" title="Chia sẻ lên Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode(url()->current()) }}&text={{ urlencode($product->name) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" title="Chia sẻ lên X">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="copyProductLink()" title="Sao chép liên kết">
+                            <i class="fa-solid fa-link me-1"></i> Sao chép link
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -279,6 +293,25 @@
             </div>
         </div>
     @endif
+
+    <!-- Recently Viewed Products (Cá nhân hóa & Gợi ý) -->
+    @if(isset($recentlyViewed) && $recentlyViewed->count() > 0)
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-extrabold mb-0">
+                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Sản Phẩm Bạn Đã Xem Gần Đây
+                </h4>
+                <span class="text-muted small">Dựa trên lịch sử duyệt web</span>
+            </div>
+            <div class="row g-4">
+                @foreach($recentlyViewed as $recent)
+                    <div class="col-6 col-md-3">
+                        @include('frontend.components.product-card', ['product' => $recent])
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>
 @endsection
 
@@ -306,6 +339,20 @@
         if (current > 1) {
             input.value = current - 1;
         }
+    }
+
+    function copyProductLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã sao chép liên kết!',
+                text: 'Bạn có thể chia sẻ sản phẩm này cho bạn bè.',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        });
     }
 </script>
 @endpush

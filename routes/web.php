@@ -52,6 +52,10 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact.submit');
 Route::get('/promotions', [PageController::class, 'promotions'])->name('promotions');
+Route::get('/faq', [PageController::class, 'faq'])->name('faq');
+Route::get('/policy', [PageController::class, 'policy'])->name('policy');
+Route::get('/blog', [PageController::class, 'blog'])->name('blog');
+Route::get('/blog/{id}', [PageController::class, 'blogDetail'])->name('blog.detail');
 
 // Shopping Cart & Coupons
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

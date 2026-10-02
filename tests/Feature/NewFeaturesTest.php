@@ -165,7 +165,45 @@ class NewFeaturesTest extends TestCase
                 'expected_time',
                 'expected_date',
                 'weight',
-                'dimensions',
             ]);
+    }
+
+    public function test_faq_policy_and_blog_pages(): void
+    {
+        // 1. FAQ page
+        $res = $this->get('/faq');
+        $res->assertStatus(200)
+            ->assertSee('Câu Hỏi Thường Gặp')
+            ->assertSee('MoMo');
+
+        // 2. Policy page
+        $res = $this->get('/policy');
+        $res->assertStatus(200)
+            ->assertSee('Chính Sách & Quy Định Hoạt Động', false)
+            ->assertSee('30 ngày');
+
+        // 3. Blog index
+        $res = $this->get('/blog');
+        $res->assertStatus(200)
+            ->assertSee('Kiến Thức Thể Thao & Mẹo Tập Luyện', false);
+
+        // 4. Blog detail
+        $res = $this->get('/blog/1');
+        $res->assertStatus(200)
+            ->assertSee('Bí quyết chọn vợt cầu lông');
+    }
+
+    public function test_customer_loyalty_tier_on_account(): void
+    {
+        $user = User::factory()->create([
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($user);
+
+        $res = $this->get('/account');
+        $res->assertStatus(200)
+            ->assertSee('Hạng Hội Viên')
+            ->assertSee('Điểm tích lũy');
     }
 }

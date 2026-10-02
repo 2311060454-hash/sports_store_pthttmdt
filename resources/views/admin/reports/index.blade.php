@@ -82,6 +82,66 @@
         </div>
     </div>
 
+    <!-- Top Sản phẩm bán chạy nhất (Yêu cầu Bài tập lớn) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-fire text-danger me-2"></i> Top 10 Sản phẩm bán chạy nhất</h5>
+                <div class="small text-muted">Thống kê theo số lượng sản phẩm đã bán và doanh thu thực tế từ đơn hàng thành công.</div>
+            </div>
+            <span class="badge bg-danger rounded-pill px-3 py-2">Bán chạy nhất</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4 py-3" style="width: 60px;">#</th>
+                        <th class="py-3">Sản phẩm</th>
+                        <th class="py-3">Danh mục</th>
+                        <th class="text-end py-3">Đơn giá</th>
+                        <th class="text-end py-3">Đã bán</th>
+                        <th class="text-end px-4 py-3">Tổng thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($bestSellingProducts as $index => $item)
+                        <tr>
+                            <td class="px-4 fw-bold text-muted">
+                                @if($index === 0)
+                                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-crown"></i> 1</span>
+                                @elseif($index === 1)
+                                    <span class="badge bg-secondary text-white">2</span>
+                                @elseif($index === 2)
+                                    <span class="badge bg-bronze text-white" style="background: #cd7f32;">3</span>
+                                @else
+                                    {{ $index + 1 }}
+                                @endif
+                            </td>
+                            <td class="py-3">
+                                <a href="{{ route('admin.products.edit', $item->id) }}" class="fw-bold text-dark text-decoration-none hover-primary">
+                                    {{ $item->name }}
+                                </a>
+                                @if($item->sku)
+                                    <div class="text-muted small">SKU: {{ $item->sku }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ $item->category_name ?? 'Chưa phân loại' }}</span>
+                            </td>
+                            <td class="text-end font-monospace">{{ number_format($item->price, 0, ',', '.') }} ₫</td>
+                            <td class="text-end fw-bold text-primary font-monospace">{{ number_format($item->total_sold) }}</td>
+                            <td class="text-end px-4 fw-bold text-success font-monospace">{{ number_format($item->total_revenue, 0, ',', '.') }} ₫</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Chưa có sản phẩm nào có lượt bán từ đơn đã thanh toán.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Bảng doanh thu theo ngày, tháng, năm -->
     @foreach([
         ['Doanh thu theo ngày (Gần đây)', 'Ngày', 'date', $revenueByDate, 'd/m/Y'],

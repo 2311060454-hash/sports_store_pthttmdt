@@ -333,6 +333,9 @@
                             </a>
                         </li>
                         <li class="nav-link-item">
+                            <a class="nav-link {{ request()->routeIs('blog*') ? 'active' : '' }}" href="{{ route('blog') }}">Tin tức</a>
+                        </li>
+                        <li class="nav-link-item">
                             <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">Giới thiệu</a>
                         </li>
                         <li class="nav-link-item">
@@ -439,8 +442,8 @@
                     <h6>Về Chúng Tôi</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
                         <li><a href="{{ route('about') }}">Giới thiệu cửa hàng</a></li>
+                        <li><a href="{{ route('blog') }}">Tin tức & Kiến thức</a></li>
                         <li><a href="{{ route('promotions') }}">Khuyến mãi & Voucher</a></li>
-                        <li><a href="{{ route('contact') }}">Hệ thống showroom</a></li>
                         <li><a href="{{ route('contact') }}">Liên hệ hỗ trợ</a></li>
                     </ul>
                 </div>
@@ -448,10 +451,10 @@
                     <h6>Chính Sách & Hỗ Trợ</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
                         <li><a href="{{ route('shipping.calculator') }}" class="text-primary fw-semibold"><i class="fa-solid fa-calculator me-1"></i> Tra cứu cước phí GHN</a></li>
-                        <li><a href="{{ route('about') }}">Chính sách giao hàng toàn quốc</a></li>
-                        <li><a href="{{ route('about') }}">Chính sách đổi trả trong 30 ngày</a></li>
-                        <li><a href="{{ route('about') }}">Bảo hành chính hãng 12 tháng</a></li>
-                        <li><a href="{{ route('contact') }}">Hỗ trợ tư vấn chọn size</a></li>
+                        <li><a href="{{ route('faq') }}"><i class="fa-solid fa-circle-question me-1"></i> Câu hỏi thường gặp (FAQ)</a></li>
+                        <li><a href="{{ route('policy') }}">Chính sách giao nhận & đồng kiểm</a></li>
+                        <li><a href="{{ route('policy') }}">Chính sách đổi trả trong 30 ngày</a></li>
+                        <li><a href="{{ route('policy') }}">Bảo mật & Bảo hành chính hãng</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6">

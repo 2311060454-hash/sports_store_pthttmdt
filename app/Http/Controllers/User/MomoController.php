@@ -183,6 +183,15 @@ class MomoController extends Controller
                 'ghn_order_code' => $response['data']['order_code'],
                 'shipping_status' => 'ready_to_pick',
             ]);
+
+            try {
+                if (!empty($order->customer_email)) {
+                    \Illuminate\Support\Facades\Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmationMail($order));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('MoMo order email sending error: ' . $e->getMessage());
+            }
+
             return 'created';
         }
 
@@ -192,6 +201,14 @@ class MomoController extends Controller
         ]);
 
         $order->update(['shipping_status' => 'pending']);
+
+        try {
+            if (!empty($order->customer_email)) {
+                \Illuminate\Support\Facades\Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmationMail($order));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('MoMo order email sending error: ' . $e->getMessage());
+        }
 
         return 'failed';
     }

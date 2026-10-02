@@ -56,6 +56,10 @@ Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/policy', [PageController::class, 'policy'])->name('policy');
 Route::get('/blog', [PageController::class, 'blog'])->name('blog');
 Route::get('/blog/{id}', [PageController::class, 'blogDetail'])->name('blog.detail');
+Route::get('/order-tracking', [OrderController::class, 'trackOrderForm'])->name('orders.tracking');
+Route::post('/order-tracking', [OrderController::class, 'trackOrderQuery'])->name('orders.tracking.search');
+Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
+Route::post('/newsletter', [PageController::class, 'newsletter'])->name('newsletter.subscribe');
 
 // Shopping Cart & Coupons
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

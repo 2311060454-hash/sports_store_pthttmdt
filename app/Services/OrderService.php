@@ -150,6 +150,15 @@ class OrderService
             }
         }
 
+        // 8. Gửi email xác nhận đơn hàng tới khách hàng
+        try {
+            if (!empty($order->customer_email)) {
+                \Illuminate\Support\Facades\Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmationMail($order));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Lỗi gửi email xác nhận đơn hàng: ' . $e->getMessage());
+        }
+
         return $order->fresh();
     }
 

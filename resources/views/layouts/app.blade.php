@@ -6,6 +6,26 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sport Store - Cửa Hàng Dụng Cụ Thể Thao Cao Cấp')</title>
 
+    <meta name="description" content="@yield('meta_description', 'Sport Store - Hệ thống phân phối dụng cụ, giày dép, trang phục thể thao chính hãng hàng đầu Việt Nam. Tích hợp giao hàng GHN toàn quốc và thanh toán MoMo.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'sport store, dụng cụ thể thao, giày thể thao, vợt cầu lông, bóng đá, đồ tập gym, ghn, momo')">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og_title', 'Sport Store - Cửa Hàng Dụng Cụ Thể Thao Cao Cấp')">
+    <meta property="og:description" content="@yield('og_description', 'Sport Store - Dụng cụ, giày dép, trang phục thể thao chính hãng Nike, Adidas, Yonex. Giao hàng toàn quốc.')">
+    <meta property="og:image" content="@yield('og_image', asset('images/banner-default.jpg'))">
+    <meta property="og:site_name" content="Sport Store">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('og_title', 'Sport Store - Cửa Hàng Dụng Cụ Thể Thao Cao Cấp')">
+    <meta name="twitter:description" content="@yield('og_description', 'Sport Store - Dụng cụ, giày dép, trang phục thể thao chính hãng Nike, Adidas, Yonex.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/banner-default.jpg'))">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -277,6 +297,9 @@
                 <span><i class="fa-solid fa-envelope me-1 text-warning"></i> support@sportstore.com</span>
             </div>
             <div>
+                <a href="{{ route('orders.tracking') }}" class="text-decoration-none text-light me-3">
+                    <i class="fa-solid fa-magnifying-glass-location me-1 text-warning"></i> Tra cứu đơn hàng
+                </a>
                 <a href="{{ route('shipping.calculator') }}" class="text-decoration-none text-light me-3">
                     <i class="fa-solid fa-calculator me-1 text-warning"></i> Tra cước GHN
                 </a>
@@ -450,6 +473,7 @@
                 <div class="col-lg-3 col-md-6">
                     <h6>Chính Sách & Hỗ Trợ</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="{{ route('orders.tracking') }}" class="text-warning fw-semibold"><i class="fa-solid fa-truck-fast me-1"></i> Tra cứu đơn hàng trực tuyến</a></li>
                         <li><a href="{{ route('shipping.calculator') }}" class="text-primary fw-semibold"><i class="fa-solid fa-calculator me-1"></i> Tra cứu cước phí GHN</a></li>
                         <li><a href="{{ route('faq') }}"><i class="fa-solid fa-circle-question me-1"></i> Câu hỏi thường gặp (FAQ)</a></li>
                         <li><a href="{{ route('policy') }}">Chính sách giao nhận & đồng kiểm</a></li>
@@ -465,6 +489,23 @@
                         <li><i class="fa-solid fa-envelope me-2 text-primary"></i> contact@sportstore.com</li>
                         <li><i class="fa-solid fa-clock me-2 text-primary"></i> Thứ 2 - Chủ Nhật (8h00 - 22h00)</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Newsletter Subscription Row -->
+            <div class="row align-items-center py-4 my-2 border-bottom border-secondary">
+                <div class="col-lg-6 mb-3 mb-lg-0">
+                    <h5 class="text-white fw-bold mb-1"><i class="fa-solid fa-envelope-open-text me-2 text-warning"></i> Đăng Ký Nhận Bản Tin Khuyến Mãi</h5>
+                    <p class="text-secondary small mb-0">Nhận ngay voucher giảm giá 10% và cập nhật sớm các mẫu giày, vợt thể thao mới nhất.</p>
+                </div>
+                <div class="col-lg-6">
+                    <form action="{{ route('newsletter.subscribe') }}" method="POST" class="d-flex gap-2">
+                        @csrf
+                        <input type="email" name="email" class="form-control rounded-pill border-0 px-3 py-2 bg-dark text-white border-secondary" placeholder="Nhập địa chỉ email của bạn..." required>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold flex-shrink-0">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Đăng Ký
+                        </button>
+                    </form>
                 </div>
             </div>
 

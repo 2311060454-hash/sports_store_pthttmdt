@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', $product->name . ' - Sport Store')
+@section('meta_description', Str::limit(strip_tags($product->description ?? $product->name), 160))
+@section('og_title', $product->name . ' - Sport Store')
+@section('og_description', Str::limit(strip_tags($product->description ?? $product->name), 160))
+@section('og_image', asset($product->thumbnail))
+@section('og_type', 'product')
 
 @section('content')
 <div class="container py-4">

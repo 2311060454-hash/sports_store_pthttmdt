@@ -75,4 +75,78 @@ class OrderController extends Controller
 
         return view('frontend.account.invoice', compact('order'));
     }
+
+    /**
+     * Public Order Tracking page (GET /order-tracking)
+     */
+    public function trackOrderForm(Request $request)
+    {
+        $code = trim((string) $request->input('code'));
+        $phone = trim((string) $request->input('phone'));
+        $order = null;
+        $currentStep = 1;
+
+        if (!empty($code)) {
+            $query = Order::with(['items.product', 'items.variant', 'paymentTransactions'])
+                ->where('order_code', $code);
+
+            if (!empty($phone)) {
+                $query->where(function ($q) use ($phone) {
+                    $q->where('customer_phone', $phone)
+                      ->orWhere('customer_phone', 'like', "%{$phone}");
+                });
+            }
+
+            $order = $query->first();
+
+            if (!$order) {
+                return view('frontend.orders.tracking', [
+                    'order' => null,
+                    'searched' => true,
+                    'code' => $code,
+                    'phone' => $phone,
+                    'error' => 'Không tìm thấy đơn hàng phù hợp với thông tin đã nhập. Vui lòng kiểm tra lại mã đơn hàng hoặc số điện thoại.',
+                ]);
+            }
+
+            $statusOrder = [
+                'pending' => 1,
+                'confirmed' => 2,
+                'preparing' => 3,
+                'shipping' => 4,
+                'delivering' => 4,
+                'completed' => 5,
+                'delivered' => 5,
+                'cancelled' => -1,
+            ];
+            $currentStep = $statusOrder[$order->status] ?? ($statusOrder[$order->shipping_status] ?? 1);
+        }
+
+        return view('frontend.orders.tracking', [
+            'order' => $order,
+            'searched' => !empty($code),
+            'code' => $code,
+            'phone' => $phone,
+            'currentStep' => $currentStep,
+            'error' => null,
+        ]);
+    }
+
+    /**
+     * Handle Tracking Form submission (POST /order-tracking)
+     */
+    public function trackOrderQuery(Request $request)
+    {
+        $request->validate([
+            'order_code' => 'required|string|max:50',
+            'phone' => 'nullable|string|max:20',
+        ], [
+            'order_code.required' => 'Vui lòng nhập mã đơn hàng của bạn (Ví dụ: SPORT-XXXXXXXX).',
+        ]);
+
+        return redirect()->route('orders.tracking', [
+            'code' => trim($request->input('order_code')),
+            'phone' => trim($request->input('phone')),
+        ]);
+    }
 }

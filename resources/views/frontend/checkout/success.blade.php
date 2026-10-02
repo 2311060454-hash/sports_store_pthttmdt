@@ -114,13 +114,16 @@
                 </div>
 
                 <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ route('orders.tracking', ['code' => $order->order_code, 'phone' => $order->customer_phone]) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-truck-fast me-2"></i> Tra Cứu Vận Đơn GHN
+                    </a>
                     <a href="{{ route('account.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
                         <i class="fa-solid fa-print me-2"></i> In Hóa Đơn
                     </a>
-                    <a href="{{ route('account.orders.show', $order->id) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
-                        <i class="fa-solid fa-clock-rotate-left me-2"></i> Theo Dõi Đơn Hàng
+                    <a href="{{ route('account.orders.show', $order->id) }}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-box-open me-2"></i> Chi Tiết Đơn Hàng
                     </a>
-                    <a href="{{ route('home') }}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                    <a href="{{ route('home') }}" class="btn btn-link text-decoration-none px-3 fw-bold">
                         Tiếp Tục Mua Sắm
                     </a>
                 </div>

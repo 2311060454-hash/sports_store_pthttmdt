@@ -197,4 +197,97 @@ class PageController extends Controller
             ],
         ];
     }
+
+    /**
+     * Generate dynamic sitemap.xml for search engines (SEO)
+     */
+    public function sitemap()
+    {
+        $products = Product::where('status', 'active')->select('slug', 'updated_at')->get();
+        $categories = \App\Models\Category::where('status', 'active')->select('slug', 'updated_at')->get();
+        $articles = $this->getBlogArticles();
+
+        $staticPages = [
+            ['url' => route('home'), 'priority' => '1.0', 'freq' => 'daily'],
+            ['url' => route('products.index'), 'priority' => '0.9', 'freq' => 'daily'],
+            ['url' => route('promotions'), 'priority' => '0.8', 'freq' => 'daily'],
+            ['url' => route('orders.tracking'), 'priority' => '0.8', 'freq' => 'daily'],
+            ['url' => route('shipping.calculator'), 'priority' => '0.7', 'freq' => 'monthly'],
+            ['url' => route('blog'), 'priority' => '0.7', 'freq' => 'weekly'],
+            ['url' => route('faq'), 'priority' => '0.6', 'freq' => 'monthly'],
+            ['url' => route('policy'), 'priority' => '0.6', 'freq' => 'monthly'],
+            ['url' => route('about'), 'priority' => '0.5', 'freq' => 'monthly'],
+            ['url' => route('contact'), 'priority' => '0.5', 'freq' => 'monthly'],
+        ];
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($staticPages as $page) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . htmlspecialchars($page['url']) . '</loc>';
+            $xml .= '<changefreq>' . $page['freq'] . '</changefreq>';
+            $xml .= '<priority>' . $page['priority'] . '</priority>';
+            $xml .= '</url>';
+        }
+
+        foreach ($categories as $cat) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . htmlspecialchars(route('products.index', ['category' => $cat->slug])) . '</loc>';
+            $xml .= '<lastmod>' . ($cat->updated_at ? $cat->updated_at->toAtomString() : now()->toAtomString()) . '</lastmod>';
+            $xml .= '<changefreq>weekly</changefreq>';
+            $xml .= '<priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        foreach ($products as $p) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . htmlspecialchars(route('products.show', $p->slug)) . '</loc>';
+            $xml .= '<lastmod>' . ($p->updated_at ? $p->updated_at->toAtomString() : now()->toAtomString()) . '</lastmod>';
+            $xml .= '<changefreq>weekly</changefreq>';
+            $xml .= '<priority>0.8</priority>';
+            $xml .= '</url>';
+        }
+
+        foreach ($articles as $art) {
+            $xml .= '<url>';
+            $xml .= '<loc>' . htmlspecialchars(route('blog.detail', $art['id'])) . '</loc>';
+            $xml .= '<changefreq>monthly</changefreq>';
+            $xml .= '<priority>0.6</priority>';
+            $xml .= '</url>';
+        }
+
+        $xml .= '</urlset>';
+
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+    }
+
+    /**
+     * Newsletter Subscription handler
+     */
+    public function newsletter(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:150',
+        ], [
+            'email.required' => 'Vui lòng nhập địa chỉ email của bạn.',
+            'email.email' => 'Địa chỉ email không đúng định dạng.',
+        ]);
+
+        Contact::create([
+            'name' => 'Khách Đăng Ký Bản Tin',
+            'email' => $validated['email'],
+            'subject' => '[Newsletter] Đăng ký nhận thông tin ưu đãi',
+            'message' => 'Khách hàng quan tâm muốn nhận thông báo ưu đãi và coupon giảm giá từ Sport Store.',
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cảm ơn bạn đã đăng ký! Sport Store sẽ gửi thông tin khuyến mãi mới nhất qua email.',
+            ]);
+        }
+
+        return back()->with('success', 'Đăng ký nhận bản tin khuyến mãi thành công! Chúng tôi đã lưu thông tin của bạn.');
+    }
 }

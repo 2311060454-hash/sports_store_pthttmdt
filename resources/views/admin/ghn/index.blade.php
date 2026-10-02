@@ -23,8 +23,8 @@
 
 <div class="row g-4 mb-4">
     <!-- Configuration Form -->
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
             <h5 class="fw-bold mb-3 border-bottom pb-2">
                 <i class="fa-solid fa-gears text-primary me-2"></i> Cấu Hình Thông Số GHN API
             </h5>
@@ -65,39 +65,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Instruction Guide -->
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-primary bg-opacity-10 border-start border-4 border-primary">
-            <h5 class="fw-bold mb-3 text-primary">
-                <i class="fa-solid fa-circle-question me-2"></i> Cách để đơn hàng xuất hiện bên GHN
-            </h5>
-            <ol class="small text-secondary mb-3 ps-3 leading-relaxed">
-                <li class="mb-2">
-                    Truy cập trang web thử nghiệm của GHN: 
-                    <a href="https://5sao.ghn.dev/" target="_blank" class="fw-bold text-decoration-none">https://5sao.ghn.dev/</a>
-                    và đăng nhập tài khoản (hoặc đăng ký bằng SĐT miễn phí).
-                </li>
-                <li class="mb-2">
-                    Tại góc trên bên phải màn hình GHN, xem <strong>Mã Shop ID</strong> (ví dụ: <code>216452</code>).
-                </li>
-                <li class="mb-2">
-                    Nhấp vào tên tài khoản &gt; chọn <strong>Quản lý thông tin</strong> &gt; mục <strong>Token API</strong> &gt; Copy chuỗi Token dạng <code>c793a1aa-...</code>.
-                </li>
-                <li class="mb-2">
-                    Dán <strong>Token</strong> và <strong>Shop ID</strong> vào biểu mẫu bên trái rồi nhấn <strong>Lưu Cấu Hình</strong>.
-                </li>
-                <li>
-                    Khi khách đặt hàng trên web hoặc Admin bấm <strong>"Tạo vận đơn GHN"</strong>, hệ thống tự động đẩy gói hàng sang GHN. Mở lại trang <strong>5sao.ghn.dev &gt; Quản lý đơn hàng &gt; Chờ bàn giao</strong> sẽ thấy đơn hàng xuất hiện ngay!
-                </li>
-            </ol>
-            <div class="p-3 bg-white rounded-3 border">
-                <div class="d-flex align-items-center gap-2 text-dark fw-semibold small">
-                    <i class="fa-solid fa-circle-check text-success"></i> Hệ thống đã tích hợp cơ chế tự động đồng bộ khi khách hoàn tất Checkout!
-                </div>
-            </div>
         </div>
     </div>
 </div>

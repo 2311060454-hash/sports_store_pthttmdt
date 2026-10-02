@@ -137,7 +137,35 @@
                             </div>
                         </div>
 
-                        <!-- Option 2: Bank Transfer -->
+                        <!-- Option 2: MoMo (Lab Orders - MoMo) -->
+                        <div class="border rounded-3 p-3 border-danger-subtle bg-light-subtle">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3" type="radio" name="payment_method" id="pay_momo" value="momo" {{ old('payment_method') === 'momo' ? 'checked' : '' }}>
+                                <label class="form-check-label w-100 cursor-pointer" for="pay_momo">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="fw-bold text-dark">
+                                            <span class="badge text-white me-2 px-2 py-1" style="background-color: #a50064; font-size: 0.8rem;">MoMo</span>
+                                            Thanh toán qua Ví MoMo / Thẻ ATM nội địa
+                                        </div>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">Khuyên dùng</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Quét mã QR qua ứng dụng Ví MoMo hoặc thanh toán thẻ ATM Napas ngân hàng nhanh chóng.</small>
+                                </label>
+                            </div>
+
+                            <!-- Test ATM Account Hint (From Lab Guide) -->
+                            <div class="mt-2 pt-2 border-top small text-muted">
+                                <div class="fw-semibold text-danger mb-1"><i class="fa-solid fa-flask-vial me-1"></i> Thẻ ATM MoMo Test (Môi trường Sandbox):</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-white text-dark border"><i class="fa-solid fa-credit-card text-primary me-1"></i> Số thẻ: <code>9704 0000 0000 0018</code> (Thành công)</span>
+                                    <span class="badge bg-white text-dark border">Tên: <b>NGUYEN VAN A</b></span>
+                                    <span class="badge bg-white text-dark border">Hạn: <b>12/30</b></span>
+                                    <span class="badge bg-white text-dark border">OTP: <b>Bất kỳ</b></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Option 3: Bank Transfer -->
                         <div class="border rounded-3 p-3">
                             <div class="form-check d-flex align-items-center">
                                 <input class="form-check-input me-3" type="radio" name="payment_method" id="pay_bank" value="bank_transfer" {{ old('payment_method') === 'bank_transfer' ? 'checked' : '' }}>
@@ -148,7 +176,7 @@
                             </div>
                         </div>
 
-                        <!-- Option 3: VNPay -->
+                        <!-- Option 4: VNPay -->
                         <div class="border rounded-3 p-3">
                             <div class="form-check d-flex align-items-center">
                                 <input class="form-check-input me-3" type="radio" name="payment_method" id="pay_vnpay" value="vnpay" {{ old('payment_method') === 'vnpay' ? 'checked' : '' }}>

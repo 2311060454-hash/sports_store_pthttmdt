@@ -47,7 +47,12 @@
                                     {{ $order->status_label }}
                                 </span>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end text-nowrap">
+                                @if($order->payment_method === 'momo' && $order->payment_status !== 'paid' && $order->status !== 'cancelled')
+                                    <a href="{{ route('orders.momo.pay', $order->id) }}" class="btn btn-sm text-white rounded-pill px-3 me-1 shadow-sm" style="background-color: #a50064;" title="Thanh toán qua MoMo">
+                                        <i class="fa-solid fa-wallet me-1"></i> Trả MoMo
+                                    </a>
+                                @endif
                                 <a href="{{ route('account.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                     Chi tiết <i class="fa-solid fa-chevron-right ms-1"></i>
                                 </a>

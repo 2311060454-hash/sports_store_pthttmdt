@@ -22,6 +22,11 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2">
+            @if($order->payment_method === 'momo' && $order->payment_status !== 'paid' && $order->status !== 'cancelled')
+                <a href="{{ route('orders.momo.pay', $order->id) }}" class="btn text-white rounded-pill px-3 shadow-sm fw-bold" style="background-color: #a50064;">
+                    <i class="fa-solid fa-wallet me-1"></i> Thanh toán lại qua MoMo
+                </a>
+            @endif
             <a href="{{ route('account.orders.invoice', $order->id) }}" target="_blank" class="btn btn-outline-secondary rounded-pill px-3">
                 <i class="fa-solid fa-print me-1"></i> In hóa đơn
             </a>
@@ -227,7 +232,11 @@
                     <div><span class="text-muted">Ghi chú:</span> <em>{{ $order->note }}</em></div>
                 @endif
                 <div class="mt-2 pt-2 border-top">
-                    <span class="text-muted">Phương thức thanh toán:</span> <strong>{{ $order->payment_method_label }}</strong>
+                    <span class="text-muted">Phương thức thanh toán:</span> 
+                    <strong>{{ $order->payment_method_label }}</strong>
+                    @if($order->payment_method === 'momo')
+                        <span class="badge text-white px-2 py-0 ms-1" style="background-color: #a50064;">MoMo</span>
+                    @endif
                 </div>
                 <div>
                     <span class="text-muted">Tình trạng thanh toán:</span> 
@@ -235,6 +244,45 @@
                         {{ $order->payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
                     </span>
                 </div>
+
+                @if($order->payment_method === 'momo' && $order->payment_status !== 'paid' && $order->status !== 'cancelled')
+                    <div class="p-3 rounded-3 mt-2 border border-danger-subtle bg-danger-subtle bg-opacity-25">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="fw-bold text-dark small"><i class="fa-solid fa-circle-exclamation text-danger me-1"></i> Chưa hoàn tất thanh toán</span>
+                            <a href="{{ route('orders.momo.pay', $order->id) }}" class="btn btn-sm text-white fw-bold px-3 rounded-pill" style="background-color: #a50064;">
+                                <i class="fa-solid fa-wallet me-1"></i> Trả ngay
+                            </a>
+                        </div>
+                        <div class="small text-muted" style="font-size: 0.8rem;">
+                            Đơn hàng của bạn sẽ được kích hoạt tạo vận đơn GHN ngay sau khi MoMo xác nhận giao dịch thành công.
+                        </div>
+                    </div>
+                @endif
+
+                @if($order->paymentTransactions->count() > 0)
+                    <div class="mt-3 pt-2 border-top">
+                        <div class="fw-bold text-muted small mb-2"><i class="fa-solid fa-receipt me-1"></i> Nhật ký giao dịch thanh toán:</div>
+                        <div class="d-flex flex-column gap-2">
+                            @foreach($order->paymentTransactions as $pt)
+                                <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+                                    <div>
+                                        <span class="fw-bold text-uppercase">{{ $pt->gateway }}</span>
+                                        @if($pt->transaction_id)
+                                            <span class="text-muted">| Mã GD: <code>{{ $pt->transaction_id }}</code></span>
+                                        @endif
+                                        <div class="text-muted">{{ $pt->created_at->format('d/m/Y H:i:s') }}</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">{{ number_format($pt->amount, 0, ',', '.') }} ₫</div>
+                                        <span class="badge {{ $pt->status === 'paid' ? 'bg-success' : ($pt->status === 'failed' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                                            {{ $pt->status === 'paid' ? 'Thành công' : ($pt->status === 'failed' ? 'Thất bại' : 'Chờ xử lý') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

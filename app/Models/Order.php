@@ -34,6 +34,7 @@ class Order extends Model
         'to_district_id',
         'to_ward_code',
         'ghn_total_fee',
+        'shipping_status',
     ];
 
     protected $casts = [
@@ -61,6 +62,16 @@ class Order extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function paymentTransactions()
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+
+    public function getTotalPriceAttribute(): float
+    {
+        return (float) ($this->total_amount ?? 0);
     }
 
     public function canBeCancelled(): bool
@@ -98,6 +109,7 @@ class Order extends Model
     {
         return match ($this->payment_method) {
             'cod' => 'Thanh toán khi nhận hàng (COD)',
+            'momo' => 'Ví điện tử MoMo / Thẻ ATM',
             'bank_transfer' => 'Chuyển khoản ngân hàng',
             'vnpay' => 'VNPay QR / Thẻ nội địa',
             default => strtoupper($this->payment_method),

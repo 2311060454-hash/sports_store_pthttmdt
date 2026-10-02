@@ -123,12 +123,31 @@ class OrderService
             return $order;
         });
 
-        // 7. Auto Push Order to GHN Shipping Service
-        try {
-            $order->load(['items.product']);
-            app(\App\Services\GHNOrderService::class)->create($order);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Auto Push to GHN error: ' . $e->getMessage());
+        // 7. Phân luồng thanh toán & Nhật ký tài chính (Lab Orders - MoMo)
+        if ($order->payment_method === 'momo') {
+            \App\Models\PaymentTransaction::create([
+                'order_id' => $order->id,
+                'gateway' => 'momo',
+                'amount' => $order->total_amount,
+                'status' => 'pending',
+            ]);
+            // Lưu ý: Đơn hàng MoMo sẽ tự động tạo vận đơn GHN sau khi thanh toán thành công (ở MoMo callback/IPN)
+        } else {
+            \App\Models\PaymentTransaction::create([
+                'order_id' => $order->id,
+                'gateway' => $order->payment_method ?: 'cod',
+                'amount' => $order->total_amount,
+                'status' => 'pending',
+                'message' => $order->payment_method === 'bank_transfer' ? 'Chuyển khoản ngân hàng' : 'Thanh toán tiền mặt khi nhận hàng (COD)',
+            ]);
+
+            // --- NHÁNH COD: TẠO VẬN ĐƠN GHN NGAY LẬP TỨC ---
+            try {
+                $order->load(['items.product']);
+                app(\App\Services\GHNOrderService::class)->create($order);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto Push to GHN error: ' . $e->getMessage());
+            }
         }
 
         return $order->fresh();

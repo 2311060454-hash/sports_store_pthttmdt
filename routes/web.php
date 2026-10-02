@@ -28,6 +28,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\User\MomoController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -130,13 +131,21 @@ Route::middleware('auth')->group(function () {
 
     // Reviews
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // MoMo Payment Routes (Lab Orders - MoMo)
+    Route::get('/orders/{order}/start-momo', [MomoController::class, 'start'])->name('orders.momo.start');
+    Route::get('/orders/{order}/pay/momo', [MomoController::class, 'payAgain'])->name('orders.momo.pay');
+    Route::get('/user/orders/{order}/start-momo', [MomoController::class, 'start'])->name('user.orders.momo.start');
+    Route::get('/user/orders/{order}/pay/momo', [MomoController::class, 'payAgain'])->name('user.orders.momo.pay');
+    Route::get('/user/orders', [OrderController::class, 'index'])->name('user.orders.index');
 });
 
 // ========================
 // 3.5. EXTERNAL INTEGRATION CALLBACKS & WEBHOOKS (MoMo, VNPay, GHN)
 // ========================
-Route::get('/payment/momo/callback', [IntegrationController::class, 'momoCallback'])->name('payment.momo.callback');
-Route::post('/payment/momo/ipn', [IntegrationController::class, 'momoIpn'])->name('payment.momo.ipn');
+Route::get('/payment/momo/callback', [MomoController::class, 'callback'])->name('payment.momo.callback');
+Route::get('/user/payment/momo/callback', [MomoController::class, 'callback'])->name('user.payment.momo.callback');
+Route::post('/payment/momo/ipn', [MomoController::class, 'ipn'])->name('payment.momo.ipn');
 Route::get('/payment/vnpay/callback', [IntegrationController::class, 'vnpayCallback'])->name('payment.vnpay.callback');
 Route::post('/ghn/webhook', [IntegrationController::class, 'ghnWebhook'])->name('ghn.webhook');
 

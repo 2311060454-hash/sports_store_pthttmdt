@@ -47,4 +47,14 @@ return [
         'default_weight' => (int) env('GHN_DEFAULT_WEIGHT', 200),
     ],
 
+    'momo' => [
+        'endpoint' => env('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create'),
+        'partner_code' => env('MOMO_PARTNER_CODE', 'MOMOBKUN20180529'),
+        'access_key' => env('MOMO_ACCESS_KEY', 'klm05TvNBzhg7h7j'),
+        'secret_key' => env('MOMO_SECRET_KEY', 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa'),
+        'verify_ssl' => filter_var(env('MOMO_VERIFY_SSL', false), FILTER_VALIDATE_BOOLEAN),
+        'redirect_url' => env('MOMO_REDIRECT_URL'),
+        'ipn_url' => env('MOMO_IPN_URL'),
+    ],
+
 ];

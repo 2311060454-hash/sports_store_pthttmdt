@@ -21,7 +21,7 @@ class CheckoutRequest extends FormRequest
             'to_district_id' => ['nullable', 'integer'],
             'to_ward_code' => ['nullable', 'string', 'max:50'],
             'shipping_fee' => ['nullable', 'numeric', 'min:0'],
-            'payment_method' => ['required', 'in:cod,bank_transfer,vnpay'],
+            'payment_method' => ['required', 'in:cod,momo,bank_transfer,vnpay'],
             'note' => ['nullable', 'string', 'max:500'],
             'coupon_code' => ['nullable', 'string', 'max:50'],
         ];

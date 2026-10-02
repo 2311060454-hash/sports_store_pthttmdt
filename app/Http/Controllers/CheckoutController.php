@@ -63,6 +63,12 @@ class CheckoutController extends Controller
 
         try {
             $order = $this->orderService->createOrder($request->validated(), $user, $this->cartService);
+
+            // Nếu thanh toán qua MoMo, chuyển hướng ngay đến cổng MoMo (theo chuẩn Lab)
+            if ($order->payment_method === 'momo') {
+                return redirect()->route('orders.momo.start', $order);
+            }
+
             $paymentResult = $this->paymentService->process($order);
 
             session()->flash('payment_info', $paymentResult);

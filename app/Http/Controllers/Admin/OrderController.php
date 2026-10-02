@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -86,11 +87,14 @@ class OrderController extends Controller
             ->orderByDesc('id')
             ->limit(1);
 
+        $orderColumns = array_diff(Schema::getColumnListing('orders'), ['payment_status', 'shipping_status']);
+        $selectCols = array_map(fn($col) => 'orders.' . $col, $orderColumns);
+
         $source = DB::table('orders')
             ->leftJoin('payment_transactions as payment', function ($join) use ($paymentId) {
                 $join->on('payment.order_id', '=', 'orders.id')->where('payment.id', '=', $paymentId);
             })
-            ->select('orders.*')
+            ->select($selectCols)
             ->selectRaw("COALESCE(payment.gateway, orders.payment_method, 'unknown') as gateway")
             ->selectRaw("COALESCE(payment.status, orders.payment_status) as payment_status")
             ->selectRaw("COALESCE(orders.shipping_status, orders.ghn_status, 'pending') as shipping_status");

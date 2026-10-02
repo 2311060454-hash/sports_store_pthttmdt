@@ -67,31 +67,50 @@ class AdminGhnController extends Controller
     /**
      * Kiểm tra kết nối tới GHN Sandbox (Test Connection)
      */
-    public function testConnection(GHNService $ghn)
+    public function testConnection(GHNService $ghn, Request $request)
     {
-        $token = $ghn->getToken();
-        $shopId = $ghn->getShopId();
+        $token = trim((string) ($request->input('token') ?: $ghn->getToken()));
+        $shopId = trim((string) ($request->input('shop_id') ?: $ghn->getShopId()));
 
         if (empty($token) || empty($shopId)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chưa cấu hình GHN_TOKEN hoặc GHN_SHOP_ID. Vui lòng nhập thông số từ tài khoản 5sao.ghn.dev của bạn.',
+                'message' => 'Chưa cấu hình GHN API Token hoặc Shop ID. Vui lòng nhập thông số từ tài khoản 5sao.ghn.dev của bạn.',
             ]);
         }
 
-        $res = $ghn->getProvinces();
+        try {
+            $response = \Illuminate\Support\Facades\Http::baseUrl(config('services.ghn.base_url', 'https://dev-online-gateway.ghn.vn/shiip/public-api'))
+                ->withOptions(['verify' => false])
+                ->timeout(12)
+                ->withHeaders([
+                    'Token' => $token,
+                    'ShopId' => (string) $shopId,
+                    'Content-Type' => 'application/json',
+                ])
+                ->get('/master-data/province');
 
-        if (isset($res['code']) && $res['code'] == 200 && !empty($res['data'])) {
+            $data = $response->json();
+
+            if ($response->successful() && isset($data['code']) && $data['code'] == 200 && !empty($data['data'])) {
+                $count = count($data['data']);
+                return response()->json([
+                    'success' => true,
+                    'message' => "Kết nối API GHN thành công! Đã tải $count Tỉnh/Thành phố. Hệ thống sẵn sàng đồng bộ đơn hàng sang 5sao.ghn.dev.",
+                    'data' => $data,
+                ]);
+            }
+
+            $errMsg = $data['message'] ?? ($data['code_message_value'] ?? 'Xác thực không thành công (HTTP ' . $response->status() . ')');
             return response()->json([
-                'success' => true,
-                'message' => "Kết nối API GHN thành công! Hệ thống sẵn sàng đồng bộ đơn hàng lên bảng điều khiển 5sao.ghn.dev.",
-                'data' => $res,
+                'success' => false,
+                'message' => 'GHN phản hồi lỗi: ' . $errMsg . '. Vui lòng kiểm tra lại mã Token API hoặc Shop ID!',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi kết nối tới máy chủ GHN: ' . $e->getMessage(),
             ]);
         }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Không thể xác thực với GHN API: ' . ($res['message'] ?? 'Lỗi không xác định'),
-        ]);
     }
 }

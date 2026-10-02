@@ -234,11 +234,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const resultAlert = document.getElementById('testResultAlert');
 
     btnTest.addEventListener('click', function () {
+        const tokenInput = document.getElementById('ghn_token_input');
+        const shopIdInput = document.getElementById('ghn_shop_id_input');
+        const tokenVal = tokenInput ? tokenInput.value.trim() : '';
+        const shopIdVal = shopIdInput ? shopIdInput.value.trim() : '';
+
         btnTest.disabled = true;
         btnTest.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang kết nối GHN...';
         resultAlert.classList.add('d-none');
 
-        fetch("{{ route('admin.ghn.test') }}")
+        const testUrl = new URL("{{ route('admin.ghn.test') }}", window.location.origin);
+        if (tokenVal) testUrl.searchParams.set('token', tokenVal);
+        if (shopIdVal) testUrl.searchParams.set('shop_id', shopIdVal);
+
+        fetch(testUrl.toString())
             .then(res => res.json())
             .then(data => {
                 btnTest.disabled = false;
@@ -248,9 +257,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     resultAlert.classList.add('alert-success');
                     resultAlert.innerHTML = `<i class="fa-solid fa-circle-check me-2"></i> <strong>Thành công!</strong> ${data.message}`;
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Kết Nối GHN Thành Công!',
+                            text: data.message,
+                            confirmButtonColor: '#ff5722'
+                        });
+                    }
                 } else {
                     resultAlert.classList.add('alert-danger');
                     resultAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-2"></i> <strong>Chưa kết nối được:</strong> ${data.message}`;
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Kết Nối GHN Thất Bại',
+                            text: data.message,
+                            confirmButtonColor: '#ff5722'
+                        });
+                    }
                 }
             })
             .catch(err => {
@@ -259,7 +284,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 resultAlert.classList.remove('d-none', 'alert-success');
                 resultAlert.classList.add('alert-danger');
                 resultAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-2"></i> Lỗi kết nối mạng: ${err.message}`;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi Mạng',
+                        text: err.message,
+                        confirmButtonColor: '#ff5722'
+                    });
+                }
             });
+    });
+
     // --- Admin Quick Rate Checker ---
     const admProvince = document.getElementById('adm_calc_province');
     const admDistrict = document.getElementById('adm_calc_district');

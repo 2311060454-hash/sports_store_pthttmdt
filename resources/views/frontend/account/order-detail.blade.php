@@ -51,7 +51,7 @@
         </div>
     @else
         <!-- Step Indicator -->
-        <div class="position-relative m-4">
+        <div class="position-relative mx-4 my-5 py-2">
             <div class="progress" style="height: 4px;">
                 @php
                     $percent = match($currentStep) {
@@ -67,39 +67,39 @@
             </div>
 
             <!-- Steps points -->
-            <div class="position-absolute top-0 start-0 translate-middle text-center" style="width: 80px;">
-                <div class="rounded-circle {{ $currentStep >= 1 ? 'bg-success text-white' : 'bg-light text-muted' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-file-invoice" style="font-size: 0.85rem;"></i>
+            <div class="position-absolute top-50 translate-middle text-center" style="left: 0%; width: 90px;">
+                <div class="rounded-circle {{ $currentStep >= 1 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-file-invoice" style="font-size: 0.9rem;"></i>
                 </div>
-                <div class="small fw-semibold mt-1" style="font-size: 0.75rem;">Đặt hàng</div>
+                <div class="small fw-semibold mt-2 {{ $currentStep >= 1 ? 'text-success' : 'text-muted' }}" style="font-size: 0.8rem;">Đặt hàng</div>
             </div>
 
-            <div class="position-absolute top-0 start-25 translate-middle text-center" style="width: 80px;">
-                <div class="rounded-circle {{ $currentStep >= 2 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-check" style="font-size: 0.85rem;"></i>
+            <div class="position-absolute top-50 translate-middle text-center" style="left: 25%; width: 90px;">
+                <div class="rounded-circle {{ $currentStep >= 2 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-check" style="font-size: 0.9rem;"></i>
                 </div>
-                <div class="small fw-semibold mt-1" style="font-size: 0.75rem;">Xác nhận</div>
+                <div class="small fw-semibold mt-2 {{ $currentStep >= 2 ? 'text-success' : 'text-muted' }}" style="font-size: 0.8rem;">Xác nhận</div>
             </div>
 
-            <div class="position-absolute top-0 start-50 translate-middle text-center" style="width: 80px;">
-                <div class="rounded-circle {{ $currentStep >= 3 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-box" style="font-size: 0.85rem;"></i>
+            <div class="position-absolute top-50 translate-middle text-center" style="left: 50%; width: 90px;">
+                <div class="rounded-circle {{ $currentStep >= 3 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-box" style="font-size: 0.9rem;"></i>
                 </div>
-                <div class="small fw-semibold mt-1" style="font-size: 0.75rem;">Chuẩn bị</div>
+                <div class="small fw-semibold mt-2 {{ $currentStep >= 3 ? 'text-success' : 'text-muted' }}" style="font-size: 0.8rem;">Chuẩn bị</div>
             </div>
 
-            <div class="position-absolute top-0 start-75 translate-middle text-center" style="width: 80px;">
-                <div class="rounded-circle {{ $currentStep >= 4 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-truck" style="font-size: 0.85rem;"></i>
+            <div class="position-absolute top-50 translate-middle text-center" style="left: 75%; width: 90px;">
+                <div class="rounded-circle {{ $currentStep >= 4 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-truck" style="font-size: 0.9rem;"></i>
                 </div>
-                <div class="small fw-semibold mt-1" style="font-size: 0.75rem;">Đang giao</div>
+                <div class="small fw-semibold mt-2 {{ $currentStep >= 4 ? 'text-success' : 'text-muted' }}" style="font-size: 0.8rem;">Đang giao</div>
             </div>
 
-            <div class="position-absolute top-0 start-100 translate-middle text-center" style="width: 80px;">
-                <div class="rounded-circle {{ $currentStep >= 5 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-flag-checkered" style="font-size: 0.85rem;"></i>
+            <div class="position-absolute top-50 translate-middle text-center" style="left: 100%; width: 90px;">
+                <div class="rounded-circle {{ $currentStep >= 5 ? 'bg-success text-white' : 'bg-light text-muted border' }} d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="fa-solid fa-flag-checkered" style="font-size: 0.9rem;"></i>
                 </div>
-                <div class="small fw-semibold mt-1" style="font-size: 0.75rem;">Hoàn thành</div>
+                <div class="small fw-semibold mt-2 {{ $currentStep >= 5 ? 'text-success' : 'text-muted' }}" style="font-size: 0.8rem;">Hoàn thành</div>
             </div>
         </div>
     @endif
